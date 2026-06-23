@@ -19,6 +19,10 @@ GATE_MODE = MANUAL        # MANUAL | AUTO
 > Running in AUTO mode removes that check — the output should be treated as a first-pass draft
 > requiring human review before any investment decision is made.
 
+### Resuming a paused pipeline
+
+At the start of a new session on an in-progress pipeline, read `pipeline.md` and `working/facts_ledger.md`. The stage tracker shows which stages are PASSED and which is PENDING — continue from the first PENDING stage. The facts ledger contains all verified evidence from prior stages; do not re-run stages that are already PASSED. Restore the NotebookLM context with `notebooklm use <notebook_id>` using the notebook ID recorded in `pipeline.md`, then proceed.
+
 ---
 
 > **Not fully autonomous research.** This is a semi-autonomous *execution* system: Claude Code runs the
