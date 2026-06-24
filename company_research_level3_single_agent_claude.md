@@ -1559,8 +1559,11 @@ company-research-[name]/
   pipeline.md  sources/raw/  sources/source_register.csv
   notebooklm_outputs/raw/  notebooklm_outputs/revised/
   working/facts_ledger.md  working/assumptions_log.md  working/open_questions.md
-  working/evidence_gaps.md  working/checks/
-  final/memo.{md,docx,pdf}  final/mandate_coverage.md  final/decision_log.md  ...
+  working/evidence_gaps.md  working/disconfirming_evidence.md  working/checks/
+  working/c9_linter_report.md  working/c9_repair_log.md
+  final/memo.{md,docx,pdf}  final/mandate_coverage.md  final/decision_log.md
+  final/post_run_lessons.md  final/proposed_process_patch.md
+  process_change_log.md
 ```
 
 ## 23. Human checkpoints (the 5 gates)
@@ -1626,6 +1629,14 @@ F — Disconfirming Evidence (§10B)
 
 G — Evidence Gap Register (§10C)
 | gap_id | missing_evidence | affected_stage | affected_conclusion | severity | current_treatment | required_source | decision_impact |
+
+H — Post-run Lessons (§28)
+| lesson_id | issue | company-specific or generic | severity | section | failure_type | proposed_action |
+
+I — Proposed Process Patch (§28; full template in §28)
+
+J — Process Change Log (§28)
+| date | version | change | reason | triggering_run | approved_by | scope | rollback_note |
 ```
 
 ## 26. What this is and is not
@@ -1660,3 +1671,138 @@ rules at once:
 - **Tool-failure HALT (§18):** a B2 reference run on this company was correctly halted at the VERIFY step
   when the extraction tool's auth expired — the gate refused to pass cap-table figures it could not
   re-verify against the primary documents, rather than falling back on earlier summaries.
+
+---
+
+## 28. Post-run learning and controlled process updates
+
+After every completed company evaluation, the agent must run a post-run learning review. The purpose is to improve the generic pipeline over time without allowing uncontrolled self-modification of the canonical process.
+
+**The agent must not silently edit this process file during or after a company evaluation.** It may only produce a proposed patch. The canonical pipeline may be updated only after explicit human approval.
+
+### Required output
+
+```text
+final/post_run_lessons.md
+final/proposed_process_patch.md
+```
+
+### Post-run learning review
+
+The agent must answer:
+
+| Question | Required answer |
+|---|---|
+| What errors or near-misses occurred? | List factual, numerical, source, judgement, wording, process and evidence-gap failures |
+| Which were company-specific? | Do not generalise one-off sector/company quirks into the generic process |
+| Which were generic process failures? | Identify failures likely to recur across companies |
+| Which existing rule should have caught the issue? | Name the section if applicable |
+| Did the rule fail because it was absent, weak, duplicated, ambiguous, or not enforced? | Classify the failure |
+| What patch would prevent recurrence? | Provide exact wording |
+| What is the cost of the patch? | Low / medium / high added process burden |
+| Should the patch apply to Screen, Standard, Full, or only a sector/objective overlay? | State scope |
+| Does the patch increase false positives or slow execution? | State trade-off |
+| Should the canonical file be updated? | yes / no / human judgement required |
+
+### Generic vs company-specific filter
+
+A lesson may be promoted into the generic process only if at least one of these is true:
+
+1. The same failure could plausibly recur across multiple companies or sectors.
+2. The failure affected a load-bearing fact, valuation, ownership basis, legal status, recommendation cap, or decision-readiness status.
+3. The failure exposed ambiguity in the pipeline itself.
+4. The failure caused unnecessary human correction loops.
+5. The failure weakened evidence discipline, source hierarchy, maturity caps, or disclosure of gaps.
+
+Do not promote a lesson into the generic process if it is merely a company-specific fact, a one-off source quirk, a temporary market condition, or a sector detail better handled by a sector overlay.
+
+### Proposed patch format
+
+```md
+# Proposed Process Patch
+
+## Summary
+One-paragraph explanation of the process weakness and why the patch is needed.
+
+## Triggering run
+Company:
+Date:
+Objective:
+Tier:
+Gate mode:
+
+## Failure or near-miss
+| issue_id | issue | company-specific or generic | severity | section that should have caught it | why it escaped |
+|---|---|---|---|---|---|
+
+## Proposed wording
+Exact copy-paste wording to add, replace, or delete.
+
+## Scope
+Screen / Standard / Full / objective overlay / sector overlay.
+
+## Cost
+Low / medium / high.
+
+## Recommendation
+Adopt / adopt with edits / reject / defer until repeated in another run.
+```
+
+### Human approval requirement
+
+The agent may mark a proposed process patch as one of:
+
+| Status | Meaning |
+|---|---|
+| PROPOSED | Suggested by the agent; not accepted |
+| HUMAN-APPROVED | Approved for canonical process update |
+| REJECTED | Human rejected it |
+| DEFERRED | Keep as a watch item until repeated |
+| SECTOR-ONLY | Add only to a sector overlay |
+| OBJECTIVE-ONLY | Add only to a research-objective overlay |
+
+Only `HUMAN-APPROVED`, `SECTOR-ONLY`, or `OBJECTIVE-ONLY` patches may be applied to the canonical process.
+
+### Process change log
+
+Maintain:
+
+```text
+process_change_log.md
+```
+
+Template:
+
+```md
+| date | version | change | reason | triggering run | approved_by | scope | rollback_note |
+|---|---|---|---|---|---|---|---|
+```
+
+### Anti-bloat rule
+
+The agent must not propose a new generic rule for every mistake. Before proposing a patch, it must ask:
+
+```text
+Can this be fixed by enforcing an existing rule?
+Can this be handled by a checklist item rather than a new section?
+Is this only relevant to one sector or company type?
+Does this make Screen-tier work too heavy?
+Would this have prevented a material error or only improved style?
+```
+
+If the answer shows low recurrence risk or low materiality, record the lesson in `post_run_lessons.md` but do not propose a canonical process update.
+
+### Final post-run status
+
+At the end of every company evaluation, include:
+
+```md
+## Post-run process learning
+| Item | Status |
+|---|---|
+| Post-run lessons file created? | yes / no |
+| Generic process failures found? | yes / no |
+| Proposed process patch created? | yes / no |
+| Human approval required? | yes / no |
+| Canonical process updated? | no unless explicit human approval recorded |
+```
