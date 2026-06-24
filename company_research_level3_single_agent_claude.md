@@ -340,6 +340,12 @@ REVISION budget            -> max 3 attempts per stage; on exhaustion HALT or es
 | units_basis | Currency; units (thousands/millions/full); period (annual/quarterly/PIT); gross/net; basic/diluted |
 | extraction_method | text parse / table parse / spreadsheet cell / screenshot / OCR / manual note |
 | classification / confidence | fact/observation/inference/assumption/unknown; high/medium/low + reason |
+| evidence_class | filed fact / reported estimate / company-reported test result / third-party contextual fact / analyst observation / inference / assumption / unknown (refines `classification`; §8A.1) |
+| decision_maturity | decision-ready / directional only / thesis-supporting only / monitoring item / not usable for decision (§8A.1) |
+| source_incentive | regulatory / company-authored / adviser / broker / commissioned / independent / government / media / unknown (§8A.3) |
+| supersession_status | current / partially superseded / fully superseded / historical context only / unknown (§8A.4) |
+| basis | gross / net / attributable / consolidated / pro forma / NCI-adjusted / unknown (§8A.2) |
+| maturity_cap | none / technical / commercial / regulatory / valuation / policy / governance (§8A.6) |
 
 **Quotes are not always possible** — when evidence is in a table, chart, scan, spreadsheet or graphic,
 record the reference, screenshot path, extraction method and uncertainty. If extraction depends on OCR or
@@ -384,9 +390,353 @@ visual reading, confidence is capped at **medium** unless human-checked.
 
 ---
 
+## 8A. Claim maturity, basis control, and decision-readiness caps
+
+The qualitative downgrade rule (§8) is necessary but not sufficient. A claim can be accurately extracted
+from a source and still be too immature, too grossly stated, too conflicted, or too non-economic to
+support a valuation or recommendation. This section adds a generic maturity and basis-control layer
+across all stages. It is designed to catch cases where a memo correctly cites a source but overstates
+what that source proves.
+
+### 8A.0 Proportionality of this layer (apply the right weight per tier)
+
+This layer obeys the same proportionality rule as §0 — applying every control to every company is
+overkill. Split the controls into *cheap/universal* (one label or one wording rule, negligible cost,
+high catch value) and *heavy/Standard+* (new enumeration work). Screen runs the cheap controls and a
+3-line C0; Standard and Full run the full layer.
+
+| 8A control | Screen | Standard | Full |
+|---|---|---|---|
+| 8A.1 two-axis labelling (evidence class × decision maturity) | conclusion-driving claims only | all load-bearing claims | all load-bearing claims |
+| 8A.2 legal-entity / basis gate | lite (legal name, listing, reporting currency, % ownership of main asset) | full | full |
+| 8A.3 source-incentive ledger | load-bearing valuation/traction sources only | full | full |
+| 8A.4 supersession & staleness | top load-bearing claims | full | full |
+| 8A.5 valuation evidence ladder | required | required | required |
+| 8A.6 technical/commercial maturity caps | required | required | required |
+| 8A.7 policy-tailwind translation | required where a tailwind is load-bearing | required where load-bearing | required where load-bearing |
+| 8A.8 related-party / conflicts mini-gate | only if governance is load-bearing | required | required |
+| 8A.9 C0 claim audit | 3-line form (top-3 claims, valuation level, recommendation cap) | full `claim_audit.md` | full `claim_audit.md` |
+| 8A.10 recommendation guardrail | required | required | required |
+| 8A.11 decision-readiness status block | short form | required | required |
+
+State any 8A control you scope down, in the same spirit as §0 ("silent scope-cutting is itself an error").
+
+### 8A.1 Evidence class and decision maturity
+
+Every load-bearing claim must carry two separate labels:
+
+1. **Evidence class**: what kind of evidence supports the claim.
+2. **Decision maturity**: how far the claim can be used in a decision.
+
+Do not collapse these into one confidence score.
+
+> **Relationship to the §4 / §11 five-class scheme.** This 8-class evidence vocabulary *refines* the
+> framework's existing `fact / observation / inference / assumption / unknown` labels — it splits
+> "fact" into {filed fact, third-party contextual fact} and "observation" into {reported estimate,
+> company-reported test result, analyst observation}. Where the rest of the document says
+> "fact/observation/inference/assumption/unknown", read it as the coarse rollup of the table below.
+> A claim labelled with the finer class inherits the coarse label automatically (e.g. *analyst
+> observation* → observation; *filed fact* → fact).
+
+| Label | Coarse rollup | Meaning | Examples |
+| --- | --- | --- | --- |
+| Filed fact | fact | Directly stated in a filing, audited account, regulatory announcement, registration notice, legal agreement or equivalent primary document | cash balance, issued shares, debt maturity, contract date |
+| Reported estimate | observation | Official estimate or technical/economic estimate, but model-dependent and not itself proof of realisable value | resource estimate, reserve estimate, management forecast, fair-value estimate |
+| Company-reported test result | observation | Testwork, pilot, product, technical, operating or customer result reported by the company | bench test, pilot trial, product sample result, internal KPI |
+| Third-party contextual fact | fact | External context from a government, regulator, market-data provider, academic source or independent report | market size, import reliance, commodity statistics, regulatory regime |
+| Analyst observation | observation | Broker, adviser, commissioned research, industry commentary or external analyst view | price target, NAV, peer comparison, strategic-buyer thesis |
+| Inference | inference | Researcher-derived conclusion from facts and observations | runway, implied dilution, likely next financing, risk ranking |
+| Assumption | assumption | Input chosen for a scenario or model | future raise price, recovery rate, capex range, conversion probability |
+| Unknown | unknown | Not established by the available evidence | undisclosed contract economics, unverified ownership, missing instrument terms |
+
+Decision maturity must be labelled separately:
+
+| Decision maturity | Meaning |
+| --- | --- |
+| Decision-ready | Can support a decision for the specific purpose claimed, subject to normal caveats |
+| Directional only | Useful for orientation, not enough for conclusion or sizing |
+| Thesis-supporting only | Supports a possible thesis but does not validate it |
+| Monitoring item | Important future evidence; not available or not conclusive yet |
+| Not usable for decision | Too stale, conflicted, unsupported, incomplete, or non-load-bearing |
+
+A claim's decision maturity cannot exceed the maturity of its evidence. Examples:
+
+* Audited cash can be decision-ready for liquidity analysis.
+* A resource, reserve, patent, clinical endpoint, engineering result, pilot result, qualification test or customer pipeline may be a reported estimate or observation, but is not automatically decision-ready for valuation.
+* A broker target is an analyst observation unless the underlying model is available and checked.
+* A government policy tailwind is thesis-supporting only until company eligibility, timing, economics and monetisation are verified.
+* A non-binding LOI, MOU, JDA, pilot, sample shipment, trial, proof-of-concept or unnamed customer conversation is not commercial traction unless counterparty identity, binding status, economics, repeatability and timing are documented.
+
+If a mandate conclusion depends on a claim marked directional only, thesis-supporting only, monitoring
+item, or not usable for decision, the final memo must state this explicitly and cannot present a
+high-conviction conclusion unless a human overrides the cap in the decision log.
+
+### 8A.2 Legal entity, reporting basis, and ownership basis gate
+
+Before B1, B2 and B6 can pass, verify and record the following:
+
+| Field | Required treatment |
+| --- | --- |
+| Exact legal name | Verify against primary source |
+| Incorporation jurisdiction | Verify against company register, annual report, exchange page or equivalent |
+| Listing venue(s) | Verify exchange, ticker, share class and trading currency |
+| Operating jurisdiction(s) | Identify where assets, customers, staff, licences or operations are located |
+| Reporting currency | State for all financial data |
+| Accounting standard | State IFRS, US GAAP, local GAAP or other basis |
+| Shareholder-rights regime | Note jurisdictional shareholder protections and differences from domestic norms |
+| Takeover-code / equivalent regime | State whether applicable, not applicable, or unknown |
+| Group structure | Identify material subsidiaries, JVs, partnerships, licences and non-controlling interests |
+| Asset ownership | State percentage ownership of each material asset, project, subsidiary, licence or contract |
+| Figure basis | State gross, net, attributable, consolidated, pro forma, non-controlling-interest adjusted, or unknown |
+
+No asset, project, customer, subsidiary, resource, reserve, NAV, revenue, cash-flow, production, user,
+contract or pipeline metric may enter valuation unless the memo states the basis.
+
+Where ownership is below 100%, or where economics are shared through a JV, royalty, earn-in, licence,
+partnership, minority interest or non-controlling interest, the memo must show both:
+
+1. **Gross basis**, if useful for project or market context.
+2. **Attributable basis**, if used for valuation, dilution, capital required or investment conclusion.
+
+If the attributable basis cannot be calculated, mark it unknown and cap valuation maturity at directional only.
+
+### 8A.3 Source independence and incentive ledger
+
+For every source used for a load-bearing claim, record the source's incentive and independence status.
+This extends the §3 source hierarchy with an incentive axis: authority and independence are different
+questions, and a primary source can still be incentive-conflicted.
+
+| Source type | Default treatment |
+| --- | --- |
+| Regulatory filing / audited account | Primary evidence for filed facts, subject to audit scope and date |
+| Legal agreement / financing document | Primary evidence for contractual terms, subject to completeness |
+| Company announcement / RNS / press release | Primary evidence that the company stated the claim; not independent proof of commercial success |
+| Investor presentation | Company claim; useful for guidance and narrative, not independent validation |
+| Broker note / corporate broker note | Analyst observation; check whether broker, nomad, placing agent or adviser relationship exists |
+| Commissioned report | Treat as potentially useful but incentive-affected unless independence is evidenced |
+| Government / regulator source | Strong for policy, licence, statistics or regulatory facts; not proof of company eligibility unless specific to the company |
+| Market-data provider | Time-stamped context; verify date, currency, share class and exchange |
+| Media / interview / promotional content | Context and management narrative only unless independently corroborated |
+| Social media / forum / anonymous commentary | Low-reliability context only |
+
+A source being primary does not make every claim in it decision-ready. A company announcement is primary
+evidence that the company made the announcement; it is not automatically independent evidence that the
+announced project, product, customer, process or market will be commercially successful.
+
+### 8A.4 Supersession and staleness check
+
+This extends the §17 current-market-data "stale" rule into a general supersession taxonomy for all
+load-bearing claims, not just market data. Every load-bearing source must be assigned a supersession
+status:
+
+| Status | Meaning |
+| --- | --- |
+| Current | No later source found that changes the claim |
+| Partially superseded | Later source updates part of the claim |
+| Fully superseded | Later source replaces the claim |
+| Historical context only | Useful for history, not current state |
+| Unknown | Later-source search incomplete |
+
+Before C2 and C9, run a supersession search for all high-impact claims. If a newer source changes the
+claim, update the Facts Ledger with a correction entry rather than overwriting the old entry (consistent
+with §22's append-only ledger rule).
+
+A stale but still useful source must be labelled as stale. A stale source cannot be used for current
+market price, current share count, current cash, current debt, current guidance, current ownership,
+current litigation, current regulatory status or current product readiness.
+
+### 8A.5 Valuation evidence ladder
+
+Every valuation must be assigned one valuation evidence level.
+
+| Level | Name | Meaning |
+| --- | --- | --- |
+| 0 | Not valuation-ready | Load-bearing economics are missing or not answerable |
+| 1 | Market-implied only | Market price or market cap observed, but no bottom-up valuation support |
+| 2 | Broker-observed | Broker or third-party target observed, but assumptions unavailable or unchecked |
+| 3 | Directional internal model | Researcher model with explicit assumptions, but not independently validated |
+| 4 | Company economic study | Company scoping study, PEA, PFS, feasibility study, management plan or equivalent |
+| 5 | Independent technical/economic study | Independent expert or audited operating cash-flow base supports valuation inputs |
+| 6 | Transaction-supported | Binding financing, offtake, acquisition, tender, asset sale, customer contract or comparable transaction supports value |
+
+Valuation rules:
+
+* If valuation is Level 0, the memo may discuss the thesis but must not present a valuation-based conclusion.
+* If valuation is Level 1 or 2, recommendation language is capped at watchlist, thesis-tracking, speculative, or decision-not-ready unless a human override is recorded.
+* If valuation depends on a broker or commissioned analyst model, the memo must state whether the full model, assumptions and share basis were available.
+* If valuation depends on future technical, regulatory, customer, financing or policy milestones, the memo must state which milestone would upgrade the valuation level.
+* If basic shares are used in any per-share valuation, the memo must also show fully diluted or explain why fully diluted is not calculable (ties to the B2 gate, §12).
+
+### 8A.6 Technical, product, customer and commercial maturity caps
+
+For any company where value depends on technical, product, regulatory, customer or operational proof,
+assign a maturity cap. This makes the §8 downgrade table concrete by binding evidence state to allowed
+wording.
+
+| Evidence state | Maximum allowed wording |
+| --- | --- |
+| Concept only | possible, proposed, intended |
+| Lab / bench / prototype | demonstrated at lab/prototype scale; not commercial proof |
+| Batch test / sample | sample result; not continuous or repeatable proof unless repeated |
+| Pilot / field trial | pilot-validated under stated conditions; not full commercial validation |
+| Customer trial / qualification | customer-tested or qualification-stage; not revenue unless economics disclosed |
+| Binding contract / purchase order | commercial traction, subject to size, margin, duration and termination terms |
+| Scaled production / repeat revenue | commercial proof, subject to retention, margin and concentration |
+| Audited operating history | strongest operating evidence, subject to trend and sustainability |
+
+The following wording is prohibited unless directly supported by mature evidence:
+
+* "proven technology"
+* "validated demand"
+* "de-risked"
+* "valuation floor"
+* "strategic inevitability"
+* "commercially proven"
+* "fully funded"
+* "world-class" without a defined metric
+* "low-cost" without disclosed cost curve or unit-cost evidence
+* "near-term production" without a dated, funded and permitted plan
+
+Use weaker wording when evidence is immature: "company-reported"; "bench-demonstrated"; "pilot-targeted";
+"early evidence"; "thesis-supporting"; "not yet independently validated"; "economics unknown";
+"commercial relevance unresolved".
+
+### 8A.7 Policy, subsidy and strategic-tailwind translation check
+
+Policy support, critical-mineral designation, defence relevance, tax incentives, grants, reshoring
+themes, industrial policy and strategic-supply concerns are context. They are not cash flow until
+eligibility and monetisation are shown. For every policy or strategic-tailwind claim, record:
+
+| Question | Required answer |
+| --- | --- |
+| What programme, law, policy or list is involved? | Source and date |
+| Is the company, asset, product or jurisdiction explicitly eligible? | yes / no / unknown |
+| Is the support automatic or discretionary? | automatic / application-based / discretionary / unknown |
+| What expenditure or activity qualifies? | mining / processing / R&D / capex / opex / production / unknown |
+| What is excluded? | state exclusions |
+| When could benefit start? | date or unknown |
+| Is cash value quantifiable? | yes / no / unknown |
+| Is there evidence of company-specific award, grant, contract or application? | yes / no / unknown |
+
+If company-specific eligibility or monetisation is unknown, cap the claim at thesis-supporting only.
+
+### 8A.8 Related-party, conflicts and adviser mini-gate
+
+B6 must include a related-party and conflicts table for all Standard and Full diligence runs, and for
+Screen runs where governance is load-bearing. Minimum rows:
+
+| Category | Required extraction |
+| --- | --- |
+| Directors and key management | remuneration, options, LTIP, loans, consulting fees |
+| Related entities | payments, receivables, payables, service contracts |
+| Advisers and brokers | broker, nomad, placing agent, corporate finance adviser, auditor, legal adviser |
+| Major shareholders | board links, financing participation, lock-ups, selling restrictions |
+| Contractors and consultants | related-party status or unknown |
+| Auditor | identity, opinion, qualifications, emphasis of matter, tenure, resignation history |
+| Litigation/regulatory | open, settled, threatened or none found |
+
+"None found" is not allowed unless the source scope is stated. Use: "No related-party transactions
+identified in [source scope/date]" rather than "none".
+
+### 8A.9 Claim audit before judgement stages (stage C0)
+
+Add a short **C0** stage before C1. Required output: `working/claim_audit.md`.
+
+| Field | Required content |
+| --- | --- |
+| Top 10 load-bearing claims | claim, source, stage, evidence class, decision maturity |
+| Weakest load-bearing claim | why it is weak and which conclusion depends on it |
+| Gross vs attributable exposure | whether all material figures are on the right basis |
+| Source independence | company, adviser, broker, government, independent, media, unknown |
+| Supersession status | current, partially superseded, fully superseded, historical, unknown |
+| Valuation evidence level | Level 0–6 |
+| Product/commercial maturity cap | cap and reason |
+| Policy-tailwind translation | eligibility and monetisation status |
+| Recommendation cap | unrestricted / speculative only / watchlist only / decision-not-ready |
+| Required downgrade | exact wording change required in the memo |
+
+C0 must be completed before C1–C9. If C0 identifies a load-bearing claim as unknown, unsupported,
+superseded, or not usable for decision, the dependent Phase C stage must either return to the relevant
+earlier stage, downgrade the conclusion, or label the issue unresolved. (Screen runs a 3-line C0: top-3
+claims, valuation level, recommendation cap.)
+
+### 8A.10 Recommendation language guardrail
+
+The final memo must separate:
+
+1. **Research conclusion**: what the evidence currently supports.
+2. **Investment action**: what, if anything, should be done.
+3. **Decision status**: whether the memo is sufficient for action.
+
+| Label | Meaning |
+| --- | --- |
+| Not decision-ready | Key evidence missing; no action conclusion should be drawn |
+| Watchlist | Interesting but insufficient for exposure |
+| Thesis-tracking | Evidence supports monitoring a defined thesis |
+| Speculative exposure only | High-risk, low-maturity case; size and dilution risk dominate |
+| Diligence candidate | Worth escalation to Full diligence |
+| Investment committee candidate | Sufficiently mature for formal decision review |
+| Reject / avoid | Evidence does not support the thesis or risk is unacceptable |
+
+A memo cannot use "buy", "sell", "hold", "conviction", "de-risked", or equivalent decision language
+unless the decision log records that the relevant human decision gate has been completed. For
+pre-revenue, pre-economic, pre-commercial, litigation-dependent, regulatory-dependent, turnaround,
+distressed, or milestone-dependent companies, the default maximum action label is "thesis-tracking" or
+"speculative exposure only" unless upgraded by specific evidence.
+
+### 8A.11 Final memo mandatory status block
+
+Every C9 memo must include the following block near the top (Screen uses a short form covering objective,
+tier, valuation level, recommendation cap and decision-approved).
+
+```md
+## Decision-readiness status
+| Item | Status |
+|---|---|
+| Research objective | |
+| Tier | |
+| Gate mode | |
+| Human judgement gates completed? | yes / no / partial |
+| Highest evidence gap severity | low / medium / high |
+| Highest unresolved risk severity | low / medium / high |
+| Valuation evidence level | 0 / 1 / 2 / 3 / 4 / 5 / 6 |
+| Product/commercial maturity cap | |
+| Gross vs attributable basis checked? | yes / no / not applicable |
+| Legal entity and shareholder-rights basis checked? | yes / no |
+| Source supersession check completed? | yes / no |
+| Final recommendation cap | unrestricted / speculative only / watchlist only / decision-not-ready |
+| Investment decision approved? | no unless explicit human approval is recorded |
+```
+
+### 8A.12 Integration map (where this layer touches the rest of the document)
+
+This section is cross-cutting; its hooks have been applied in place so the layer is enforced, not just
+described:
+
+- **§7 Evidence pack** — adds `evidence_class`, `decision_maturity`, `source_incentive`,
+  `supersession_status`, `basis`, `maturity_cap`.
+- **§9 Stage list** — inserts stage **C0 (claim audit and confidence-cap review)** before C1.
+- **§10 C9 assembly rules** — adds the decision-readiness status block, the recommendation-cap rule, the
+  evidence-class-equivalence ban, the gross-vs-attributable rule, and the policy-tailwind rule.
+- **§15 Stage acceptance criteria** — adds the maturity-and-basis recording requirement.
+- **Appendix A / B** — extended with the new columns.
+
+### 8A.13 Generic failure modes this section is meant to catch
+
+Before C9, this layer should catch: correct citation but wrong legal-entity or shareholder-rights basis;
+use of gross project numbers where attributable economics matter; treating a reported estimate as
+economic proof; treating a company-reported test result as commercial validation; treating a broker
+target as independently verified valuation; treating a policy tailwind as company-specific cash value;
+treating a non-binding or unnamed customer signal as traction; using stale sources after later
+announcements supersede them; allowing unresolved high-impact gaps to sit in source limitations while the
+conclusion remains too strong; and using investment-action language where the evidence only supports
+thesis tracking.
+
+---
+
 # PART II — STAGES
 
-## 9. Stage list (16 stages, 3 phases)
+## 9. Stage list (16 core stages + C0 claim-audit gate, 3 phases)
 
 Governance is **folded** in (flagged at A1, analysed in B6, ranked in C7), escalated to its own stage
 only when A1 marks it high-stakes.
@@ -425,6 +775,13 @@ only when A1 marks it high-stakes.
 > passes, confirm that no open question in `open_questions.md` is load-bearing to that stage's conclusion
 > (or is explicitly labelled non-blocking). A1's answerability check is re-applied per judgement stage,
 > not only once.
+- **C0. Claim audit & confidence-cap review.** Before judgement begins, identify the top-10 load-bearing
+  claims; record evidence class and decision maturity (§8A.1); test gross vs attributable basis (§8A.2);
+  test source independence (§8A.3); check supersession (§8A.4); assign the valuation evidence level
+  (§8A.5) and product/commercial maturity cap (§8A.6); translate any policy tailwind (§8A.7); set the
+  recommendation cap. Output `working/claim_audit.md` (Screen: 3-line form). A claim found unknown,
+  unsupported, superseded or not-usable-for-decision forces the dependent stage to revert, downgrade or
+  label unresolved.
 - **C1. Market & competition** (+ dated overlay). Each market-size claim: source, methodology, geography,
   segment definition, TAM/SAM/SOM, does the company serve the defined market, double-counting risk.
 - **C2. Valuation.** Method **appropriateness table** (method | appropriate? | why | required evidence |
@@ -461,11 +818,11 @@ register; bull/bear/base; management questions.
 **Required outputs:** `final/memo.md`, `memo.docx`, `memo.pdf`, `mandate_coverage.md`, `evidence_pack.md`,
 `facts_ledger.md`, `checks_summary.md`, `open_questions.md`, `source_register.csv`, `decision_log.md`.
 
-**Memo structure:** title; mandate answer table; executive conclusion; business model; product &
-differentiation; market; commercial traction; operational readiness; financials; financing & capital
-structure; capital required; valuation framework; M&A & strategic options; listing venue & comparables;
-management credibility & governance; bull/bear/base; risk register; management questions; evidence that
-would change the conclusion; source limitations; appendices.
+**Memo structure:** title; **decision-readiness status block (§8A.11)**; mandate answer table; executive
+conclusion; business model; product & differentiation; market; commercial traction; operational
+readiness; financials; financing & capital structure; capital required; valuation framework; M&A &
+strategic options; listing venue & comparables; management credibility & governance; bull/bear/base; risk
+register; management questions; evidence that would change the conclusion; source limitations; appendices.
 
 **Assembly rules:**
 - No new evidence at C9. Every load-bearing fact must trace to a Facts Ledger entry.
@@ -480,6 +837,15 @@ would change the conclusion; source limitations; appendices.
   item may pass. Every HIGH risk-register entry (C7) and every `evidence_gaps.md` entry must be mitigated,
   accepted-with-caveat, or explicitly disclosed in the memo. A machine-checkable "no undisclosed HIGH
   items" condition must pass before C9 sign-off.
+- **Decision-readiness status block (§8A.11) is mandatory** near the top of the memo.
+- The memo must not present a recommendation stronger than the cap set in C0 (§8A.9) unless the decision
+  log records a human override.
+- Filed facts, reported estimates, company-reported test results, analyst observations and inferences
+  must not be visually or verbally treated as equivalent (§8A.1).
+- Any gross project, asset, customer, revenue, resource, reserve or NAV figure must state whether it is
+  also shown on an attributable basis (§8A.2).
+- A policy, subsidy, government, strategic or geopolitical tailwind must not be treated as value unless
+  company-specific eligibility and monetisation are evidenced (§8A.7).
 
 **Mandate coverage table (mandatory):**
 
@@ -624,7 +990,10 @@ A stage passes only if:
 - contradictions are resolved or explicitly labelled unresolved;
 - evidence gaps are recorded;
 - the Facts Ledger is updated;
-- the gate decision is saved.
+- the gate decision is saved;
+- load-bearing claims have evidence class, decision maturity, source incentive, supersession status and
+  basis recorded where applicable (§8A); a stage whose conclusion depends on a claim capped below
+  decision-ready must downgrade that conclusion or mark the issue unresolved for C0/C9.
 ```
 
 Worked example — **B2 passes only if:** basic verified against primary source; bridge ties to basic; all
@@ -777,10 +1146,10 @@ by agent vigilance alone.**
 
 ```md
 A — Evidence pack
-| claim_id | claim | source_title | source_type | date | page_or_section | source_quote_or_reference | extracted_value | units_basis | extraction_method | classification | confidence | reason |
+| claim_id | claim | source_title | source_type | source_incentive | date | page_or_section | source_quote_or_reference | extracted_value | units_basis | basis | extraction_method | evidence_class | decision_maturity | supersession_status | maturity_cap | confidence | reason |
 
 B — Facts Ledger
-| fact_id | stage | fact | classification | source_title | page_or_section | source_quote_or_reference | units_basis | confidence | date_added | status |
+| fact_id | stage | fact | evidence_class | decision_maturity | source_title | source_incentive | page_or_section | source_quote_or_reference | units_basis | basis | supersession_status | maturity_cap | confidence | date_added | status |
 
 C — Check output
 | check_id | stage | check_name | input_file | code_file | output_file | result | mismatch | materiality | timestamp | notes |

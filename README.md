@@ -149,7 +149,7 @@ Claude Code will run each stage sequentially:
 |---|---|---|
 | **A — Scope & source integrity** | A1 | Checks if the research mandate is answerable from your sources. Halts if not. |
 | **B — Evidence spine** | B1–B6 | Financial spine → cap table → business model → asset evidence → management track record. Python scripts verify every key number. |
-| **C — Judgement** | C1–C9 | Market/competition → valuation → capital requirements → scenarios → final memo |
+| **C — Judgement** | C0–C9 | Claim audit & confidence caps (C0) → market/competition → valuation → capital requirements → scenarios → final memo |
 
 At each human gate (MANUAL mode), Claude will present a structured checkpoint packet and wait for one of:
 - `approve` — proceed to next stage
@@ -172,6 +172,12 @@ Every fact in the ledger carries one of four classifications:
 | **assumption** | Required for the analysis but not grounded in a primary source |
 
 The pipeline automatically applies **qualitative downgrade rules**: if a claim lacks a primary source, its classification is downgraded and the wording in the output is softened accordingly.
+
+For Standard and Full diligence, §8A refines these four classes into eight evidence classes (e.g.
+*filed fact*, *reported estimate*, *company-reported test result*, *analyst observation*) and adds a
+separate **decision-maturity** axis (decision-ready → not-usable-for-decision), a **valuation evidence
+ladder** (Level 0–6), and **recommendation caps** so a memo cannot state a conclusion stronger than its
+weakest load-bearing evidence supports.
 
 ---
 
