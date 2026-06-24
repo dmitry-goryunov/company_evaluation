@@ -100,7 +100,18 @@ notebooklm use <notebook_id>
 
 ### 3b. Open Claude Code and load the framework file
 
-Start a Claude Code session and attach the framework file:
+Start a Claude Code session and attach the core file:
+
+```
+@pipeline_core.md read the file. do not action anything
+```
+
+The core file (~500 lines) contains everything needed for every stage. As you run each stage, Claude
+will read the relevant section from `pipeline_reference.md` on demand (the dispatch table at the end
+of `pipeline_core.md` tells it when). This two-file structure cuts the mandatory context load by
+roughly two-thirds compared to loading the full combined file.
+
+Alternatively, load the full combined file if you prefer everything in one place:
 
 ```
 @company_research_level3_single_agent_claude.md read the file. do not action anything
@@ -247,7 +258,9 @@ A Screen automatically escalates to Standard if it finds: pre-revenue company, g
 
 | File | Description |
 |---|---|
-| `company_research_level3_single_agent_claude.md` | The full pipeline specification — load this into Claude Code |
+| `pipeline_core.md` | **Load this at session start.** ~500 lines. Design principles, stage loop, cross-cutting rules (§8A core controls, do-not-proceed conditions, core principles). Stays in context for the entire run. |
+| `pipeline_reference.md` | **Read specific sections on demand.** ~1,300 lines. Source-acquisition checklists, stage procedures, verification protocols, linter checklists, appendix templates, post-run learning. The dispatch table in `pipeline_core.md` says when to read which section. |
+| `company_research_level3_single_agent_claude.md` | Full combined file (legacy). Equivalent to core + reference in one document. Use if you prefer a single-file load; accept the higher context cost. |
 | `README.md` | This file |
 
 ---
