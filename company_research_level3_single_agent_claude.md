@@ -309,6 +309,9 @@ SELF-CHECK    Re-read wearing the "assume this is wrong" hat: run the checklist;
               QUALITATIVE DOWNGRADE rule (§8); label fact/observation/inference/assumption/unknown.
 RECONCILE     Diff new claims against the Facts Ledger; flag contradictions.
 GATE          Check the gate. If numeric, the deterministic check MUST pass. Check acceptance criteria (§15).
+SELF-REPAIR   Run the relevant stage linter. Fix direct contradictions, stale labels, prohibited wording,
+              and status mismatches before surfacing the stage. Save repair_log.md. If a hard blocker
+              remains, HALT or downgrade under §18.
 CHECKPOINT    Surface to the human at a high-stakes gate, or when a hard check fails (packet in §16).
 COMMIT        Append confirmed facts (with primary-source reference + page) to the Facts Ledger. PASS.
 ```
@@ -874,6 +877,310 @@ circulation / with listed caveats / rejected.
 
 ---
 
+## 10A. Pre-human self-repair loop and final consistency linter
+
+The pipeline must reduce avoidable human correction loops. The agent should not surface a draft to the human while fixable internal contradictions, stale labels, unsupported upgrades, copied version errors, or prohibited wording remain.
+
+This section converts existing self-check, revision, C0, C9, and clean-room controls into a mandatory self-repair loop.
+
+### 10A.1 Purpose
+
+The human should review judgement, source sufficiency, and unresolved evidence gaps. The human should not be used as the first detector of routine process failures such as:
+
+- wrong legal entity basis;
+- wrong ownership or attributable basis;
+- stale "v3/v4" labels in a later memo;
+- "AUTO-APPROVED" language in AUTO-run mode;
+- "buy/hold/sell/conviction" language where no human decision gate has approved it;
+- "validated/proven/de-risked/world-class" wording not permitted by evidence maturity;
+- source-classification footers that contradict §8A;
+- C0 saying a claim failed while C9 says the memo is fully compliant;
+- stage tables saying "decision-ready" while the relevant evidence section says "gap";
+- gross project values used without attributable basis;
+- policy tailwinds treated as company-specific value;
+- broker targets treated as independent valuation;
+- unresolved HIGH risk or evidence gaps hidden in source limitations.
+
+These errors must be caught by the agent before human review.
+
+### 10A.2 AUTO mode wording
+
+Replace all uses of `AUTO-APPROVED` with execution-status language.
+
+Allowed AUTO labels:
+
+| Label | Meaning |
+|---|---|
+| AUTO-RUN COMPLETE | Stage executed without human pause; no material caveat found |
+| AUTO-RUN COMPLETE WITH CAVEATS | Stage executed; material gaps, confidence caps, or unresolved issues remain |
+| AUTO-BLOCKED | Stage cannot proceed under do-not-proceed rules |
+| AUTO-REPAIRED | A fixable inconsistency was found and corrected before human review |
+| HUMAN-REVIEW REQUIRED | Judgement gate not performed by the agent |
+| NOT DECISION-APPROVED | No investment decision has been approved |
+
+Prohibited AUTO labels:
+- AUTO-APPROVED
+- gate approved
+- final memo approved
+- investment approved
+- zero-open closure passed, unless every HIGH risk and load-bearing gap is either mitigated, accepted with caveat, or explicitly disclosed
+
+AUTO mode is an execution setting, not an approval setting.
+
+### 10A.3 Mandatory repair loop before every human checkpoint
+
+Before presenting any human checkpoint packet, the agent must run a self-repair loop.
+
+```text
+DRAFT_STAGE_OUTPUT
+RUN_STAGE_LINTER
+IF fixable_errors_found:
+    APPLY_FIXES
+    SAVE repair_log.md
+    RERUN affected deterministic checks or evidence checks
+    RERUN_STAGE_LINTER
+REPEAT up to 3 repair cycles
+IF only judgement gaps remain:
+    PRESENT checkpoint packet
+IF hard blocker remains:
+    HALT or downgrade according to §18
+```
+
+Fixable errors are corrected automatically. Hard blockers are not papered over.
+
+### 10A.4 Mandatory C9 final self-repair loop
+
+Before C9 is shown to the human, the agent must run a final memo linter and repair loop.
+
+Required output:
+
+```text
+working/c9_linter_report.md
+working/c9_repair_log.md
+final/memo.md
+```
+
+The linter must produce one of three statuses:
+
+| Status | Meaning |
+|---|---|
+| CLEAN | No fixable process inconsistency found |
+| AUTO-REPAIRED | Fixable issues were found and corrected; repair log saved |
+| BLOCKED | Hard issue remains; memo cannot be presented as complete |
+
+The final memo cannot be emitted until the C9 linter status is CLEAN or AUTO-REPAIRED.
+
+### 10A.5 C9 linter checklist
+
+The C9 linter must check the final memo against the following list.
+
+#### A. Version and status consistency
+
+```text
+- Memo title version matches pipeline summary version.
+- Footer version matches title version.
+- C9 row refers to the current memo version.
+- No stale v1/v2/v3/v4 references remain unless explicitly historical.
+- Gate mode wording is consistent throughout.
+- AUTO mode uses AUTO-RUN COMPLETE / WITH CAVEATS, not AUTO-APPROVED.
+- Human review status is explicit.
+- Investment decision status is explicit.
+```
+
+#### B. Legal entity and ownership basis
+
+```text
+- Legal name is present.
+- Incorporation jurisdiction is present.
+- Company number is present if publicly available.
+- Listing venue, ticker, share class and trading currency are present.
+- Main operating jurisdiction is present.
+- Shareholder-rights regime is present.
+- Takeover-code or equivalent status is present.
+- Group / subsidiary / JV structure is present where material.
+- Main asset ownership percentage is present.
+- Gross and attributable basis are both shown where ownership is below 100%.
+- Any unknown ownership, royalty, JV, earn-in, economic burden or NCI issue is explicitly disclosed.
+```
+
+If the memo contains both "gross" and "attributable" figures, C9 must verify that the final conclusion does not revert to gross-only language.
+
+#### C. Evidence-class consistency
+
+```text
+- Every load-bearing claim has an evidence class.
+- Every load-bearing claim has decision maturity.
+- "Filed fact" is not used for company-reported technical success unless the fact is only that the company reported it.
+- Reported estimates are not treated as economic proof.
+- Company-reported test results are not treated as commercial validation.
+- Broker estimates are not treated as independent valuation.
+- Policy facts are not treated as company-specific cash flow.
+- Unknowns and gaps are not visually presented as resolved.
+```
+
+#### D. Decision-readiness consistency
+
+```text
+- If any C0 claim is FLAG or FAIL, the dependent section carries the same caveat.
+- If valuation level is 0–2, no DCF/NPV conclusion is presented as decision-grade.
+- If valuation level is 0–2, recommendation is capped at watchlist / thesis-tracking / speculative / decision-not-ready unless human override is recorded.
+- If product or technical proof is lab/bench/prototype only, commercial validation language is prohibited.
+- If customer evidence is non-binding, unnamed, unpaid or not repeated, commercial traction language is downgraded.
+- If financials are said to be decision-ready but auditor identity/opinion is unknown, the memo splits "financial spine decision-ready" from "audit review incomplete".
+```
+
+#### E. Prohibited wording scan
+
+The linter must search for and justify or replace these words and phrases:
+
+```text
+buy
+sell
+hold
+conviction
+de-risked
+validated
+proven
+commercially proven
+fully funded
+world-class
+valuation floor
+strategic inevitability
+near-term production
+guaranteed
+certain
+low-cost
+best-in-class
+independently verified
+```
+
+Allowed only if supported by mature evidence and the relevant human decision gate has approved the wording. Otherwise replace with weaker evidence-stated wording.
+
+#### F. Source and citation consistency
+
+```text
+- Every load-bearing fact traces to the Facts Ledger.
+- Every source limitation is reflected in the relevant section, not only hidden at the end.
+- No source type is declared automatically decision-ready.
+- Current market data has date, currency and exchange.
+- Share count uses the latest registration or share-capital source.
+- Supersession status is current or explicitly stated.
+- Any source conflict is resolved, downgraded or carried as unresolved.
+```
+
+#### G. HIGH-risk and evidence-gap disclosure
+
+```text
+- Every HIGH risk in C7 appears in the final memo.
+- Every load-bearing evidence gap appears in the final memo.
+- No HIGH risk or load-bearing evidence gap is disclosed only in an appendix.
+- C9 disclosure check states whether undisclosed HIGH items remain.
+- If unresolved HIGH items remain, the memo cannot say "pass" without caveats.
+```
+
+#### H. Recommendation guardrail
+
+```text
+- Research conclusion, investment action, and decision status are separated.
+- Final classification does not exceed the C0 recommendation cap.
+- "Investment decision approved" is never yes unless explicit human approval exists in decision_log.md.
+- AUTO-run final output says "not decision-approved".
+```
+
+### 10A.6 Repair actions
+
+When the linter finds an issue, the agent must classify it as one of four types.
+
+| Type | Action |
+|---|---|
+| Text consistency error | Fix directly and record in repair log |
+| Evidence classification error | Downgrade label and propagate caveat to dependent sections |
+| Missing source / hard verification gap | Do not invent; mark gap, downgrade, or halt under §18 |
+| Judgement ambiguity | Keep explicit; present to human as a judgement question |
+
+Examples:
+
+```text
+If "UK-incorporated" conflicts with source register -> replace with verified jurisdiction.
+If "100% resource" is used where ownership is 70% -> add gross and attributable basis.
+If "AUTO-APPROVED" appears -> replace with AUTO-RUN COMPLETE or AUTO-RUN COMPLETE WITH CAVEATS.
+If "validated" appears for bench-scale data -> replace with bench-demonstrated / company-reported test result.
+If "buy" appears without human decision approval -> replace with thesis-tracking / speculative exposure only / decision-not-ready.
+If C0 says auditor identity is a gap but B1 says financials are fully decision-ready -> split financial-spine readiness from audit-review readiness.
+```
+
+### 10A.7 Repair log format
+
+Every automatic repair must be saved.
+
+```md
+# C9 Repair Log
+| issue_id | location | issue_type | original_text | repaired_text | reason | source_or_rule | residual_gap |
+|---|---|---|---|---|---|---|---|
+```
+
+The repair log must also include:
+
+```text
+- number of linter findings;
+- number auto-repaired;
+- number downgraded;
+- number left as unresolved;
+- number causing halt;
+- final linter status: CLEAN / AUTO-REPAIRED / BLOCKED.
+```
+
+### 10A.8 Maximum repair cycles
+
+The agent may run up to three repair cycles.
+
+```text
+Cycle 1: fix direct contradictions and prohibited wording.
+Cycle 2: propagate fixes to dependent tables, executive conclusion, C0, C7, C9 and footer.
+Cycle 3: final consistency sweep.
+```
+
+If the same issue survives three cycles, the agent must not ask the human to keep correcting it line by line. It must produce a single blocker note:
+
+```md
+## Blocker after three self-repair cycles
+| Issue | Why not resolved | What source or judgement is needed | Suggested human action |
+|---|---|---|---|
+```
+
+### 10A.9 Human interaction policy
+
+In AUTO mode, the agent should not ask the human for incremental corrections unless one of these applies:
+
+1. A required source is missing.
+2. Two primary sources conflict and no hierarchy rule resolves the conflict.
+3. A judgement call changes the recommendation cap.
+4. A do-not-proceed condition is triggered.
+5. The user explicitly asks to review intermediate stages.
+
+Otherwise, the agent should repair, downgrade, or disclose internally and continue.
+
+### 10A.10 Standard final status wording
+
+At the end of every AUTO-run memo, use one of these standard statuses:
+
+| Status | When to use |
+|---|---|
+| Process-acceptable thesis-tracking memo | Evidence sufficient for monitoring, not decision |
+| Process-acceptable with disclosed gaps | Useful memo, but material gaps remain |
+| Decision-not-ready | Key evidence missing or immature |
+| Blocked | Required source/check failed |
+| Human-decision candidate | Evidence mature enough for formal human review |
+| Decision-approved | Only after explicit human sign-off |
+
+Do not use informal phrases such as "passed diligence", "approved", "green light", or "conviction" unless explicitly supported by the decision log.
+
+### 10A.11 Integration updates to existing sections
+
+See §6 (SELF-REPAIR step added), §16 (AUTO label updated), §18 (four new do-not-proceed conditions), §20 (repair entries), §25 (Appendix E).
+
+---
+
 # PART III — OPERATING PROCEDURE (how it runs)
 
 ## 11. Primary-source verification protocol
@@ -1012,10 +1319,10 @@ Appendix D).
 
 **GATE_MODE behaviour:**
 - **MANUAL:** Agent pauses and waits for the user's explicit approval choice before proceeding.
-- **AUTO:** Agent records the checkpoint packet to file, stamps the approval record as
-  `AUTO-APPROVED (GATE_MODE=AUTO) — no human review at this gate`, and immediately proceeds to the
-  next stage. All artefacts are still written. The session ends with a summary of all auto-approved
-  gates so the user can review them together.
+- **AUTO:** Agent records the checkpoint packet to file, runs the self-repair loop (§10A.3), stamps
+  the stage as `AUTO-RUN COMPLETE` or `AUTO-RUN COMPLETE WITH CAVEATS`, and proceeds. It must not
+  stamp judgement gates as approved. All artefacts are still written. The session ends with a summary
+  of all caveats, gaps, repairs, and non-decision-approved items for human review.
 
 ## 17. Current market data rule
 
@@ -1041,6 +1348,10 @@ HALT, or downgrade the final conclusion, if:
 - **a required tool fails (e.g. NotebookLM auth expiry, browser/automation breakage, source file
   unreadable). Do NOT substitute memory or an earlier summary for primary-source verification — fix the
   tool and resume.**
+- the C9 linter status is BLOCKED;
+- the same load-bearing contradiction survives three self-repair cycles (§10A.8);
+- legal entity, ownership basis, share count, or valuation basis cannot be verified;
+- the memo's recommendation exceeds the C0 recommendation cap and no human override exists.
 
 > *Validated in practice:* a B2 reference run was halted at the VERIFY step when NotebookLM authentication
 > expired. The gate behaved correctly — it refused to pass cap-table figures that could not be re-verified
@@ -1063,8 +1374,14 @@ Maintain `final/decision_log.md`:
 | date | stage | decision | rationale | alternatives considered | owner | follow-up |
 ```
 
+Repair entries (added by the §10A self-repair loop):
+
+```md
+| date | stage | repair_status | issues_found | issues_repaired | residual_gaps | decision_impact |
+```
+
 Record: tier selection; source-sufficiency decisions; human approvals; waived stages; valuation method;
-share basis; escalation decisions; final sign-off status.
+share basis; escalation decisions; repair cycles run; final sign-off status.
 
 ## 21. Implementation readiness checklist
 
@@ -1156,6 +1473,9 @@ C — Check output
 
 D — Human approval
 | stage | checkpoint | approver | date_time | decision | caveats | required_follow_up |
+
+E — Repair Log
+| issue_id | stage | location | issue_type | original_text | repaired_text | rule_triggered | residual_gap | status |
 ```
 
 ## 26. What this is and is not
