@@ -751,7 +751,7 @@ only when A1 marks it high-stakes.
   partially / not answerable / blocked pending source*; for each blocked one, name the missing source
   type. **Dependency rule:** a high-stakes question (financials, cap table, valuation) that is not
   answerable -> **HALT and demand sources.** Apply the sector source overlay. **Flag governance** routine
-  vs high-stakes. *Human checkpoint #1.*
+  vs high-stakes. **Run the disconfirming-evidence search (§10B); output `working/disconfirming_evidence.md` before A1 PASS.** *Human checkpoint #1.*
 
 ### Phase B — Evidence Spine (numbers first)
 - **B1. Financial spine.** Revenue, margins, opex, EBITDA/operating loss, net loss, cash flow, capex,
@@ -1087,6 +1087,30 @@ Allowed only if supported by mature evidence and the relevant human decision gat
 - AUTO-run final output says "not decision-approved".
 ```
 
+#### Summary: concrete required checks
+
+The linter must explicitly verify:
+
+```text
+- memo version, footer version, C9 row and pipeline summary all match;
+- AUTO mode says AUTO-RUN COMPLETE or AUTO-RUN COMPLETE WITH CAVEATS, not AUTO-APPROVED;
+- human review status and investment-decision status are explicit;
+- final recommendation does not exceed the C0 recommendation cap;
+- legal name, incorporation jurisdiction, company number, listing venue, shareholder-rights regime
+  and takeover-code status are internally consistent;
+- gross and attributable basis are both shown where ownership is below 100%;
+- filed facts, reported estimates, company-reported test results, broker estimates, inferences and
+  assumptions are not treated as equivalent;
+- bench/lab/prototype evidence is not described as commercial proof;
+- non-binding, unnamed, unpaid or early-stage customer evidence is not described as validated demand;
+- policy support is not treated as company-specific cash flow unless eligibility and monetisation
+  are evidenced;
+- every HIGH risk and every load-bearing evidence gap is disclosed before C9 sign-off;
+- prohibited wording is removed or justified: buy, sell, hold, conviction, proven, validated,
+  de-risked, fully funded, world-class, low-cost, near-term production, valuation floor,
+  strategic inevitability.
+```
+
 ### 10A.6 Repair actions
 
 When the linter finds an issue, the agent must classify it as one of four types.
@@ -1178,6 +1202,93 @@ Do not use informal phrases such as "passed diligence", "approved", "green light
 ### 10A.11 Integration updates to existing sections
 
 See §6 (SELF-REPAIR step added), §16 (AUTO label updated), §18 (four new do-not-proceed conditions), §20 (repair entries), §25 (Appendix E).
+
+---
+
+## 10B. Mandatory disconfirming-evidence search
+
+The pipeline is strong at verifying claims it finds. It must also force a search for evidence that weakens the thesis. This search must complete before A1 can PASS.
+
+Required output: `working/disconfirming_evidence.md`
+
+### Search terms
+
+Run the following searches against available sources, NotebookLM, and internet sources:
+
+```text
+[Company] fraud
+[Company] lawsuit OR litigation
+[Company] regulatory investigation
+[Company] auditor resignation OR auditor qualification
+[Company] going concern
+[Company] short report
+[Company] missed guidance
+[Company] delayed project
+[Company] failed trial OR failed pilot OR failed test
+[Company] customer loss OR contract termination
+[Company] related party transaction
+[Company] director resignation
+[Company] share dilution OR placing OR convertible
+[Company] environmental permit objection
+[Company] financing failed
+```
+
+### Output template
+
+| Item | Evidence found? | Source | Date | Severity | Relevance | Action |
+|---|---|---|---|---|---|---|
+| Fraud / short allegations | yes / no / unknown | | | | | |
+| Litigation / regulatory | yes / no / unknown | | | | | |
+| Auditor / accounting issue | yes / no / unknown | | | | | |
+| Customer / contract failure | yes / no / unknown | | | | | |
+| Technical / product failure | yes / no / unknown | | | | | |
+| Financing / dilution stress | yes / no / unknown | | | | | |
+| Governance / related-party concern | yes / no / unknown | | | | | |
+| Missed guidance / delay | yes / no / unknown | | | | | |
+
+**If a material adverse item is found**, it must enter:
+- the Facts Ledger (with primary-source reference);
+- the C0 claim audit table;
+- the C7 risk register;
+- the C9 source limitations section.
+
+**If no adverse item is found**, state the search scope, search date, and sources checked. Do not write "none" without search scope.
+
+---
+
+## 10C. Evidence-gap severity
+
+Evidence gaps must carry an explicit severity label. Severity mechanically caps the conclusions that depend on the gap.
+
+Required output: `working/evidence_gaps.md`
+
+### Severity scale
+
+| Severity | Meaning | Effect |
+|---|---|---|
+| Critical | The research objective cannot be answered without it | Halt or mark decision-not-ready |
+| High | The conclusion may change materially if the gap resolves adversely | Disclose in executive conclusion and cap recommendation |
+| Medium | Important but not thesis-breaking on its own | Disclose in relevant section and risk register |
+| Low | Useful refinement; unlikely to change conclusion | Track in source limitations |
+
+### Output template
+
+| gap_id | missing evidence | affected stage | affected conclusion | severity | current treatment | required source | decision impact |
+|---|---|---|---|---|---|---|---|
+
+### Rules
+
+```text
+- Critical gap blocks the dependent stage.
+- High gap must appear in C0, C7 and C9.
+- Medium gap must appear in the relevant body section.
+- Low gap may remain in source limitations.
+- If a High or Critical gap affects valuation, valuation evidence level cannot exceed Level 2
+  unless a human override is recorded in decision_log.md.
+- If a High or Critical gap affects product readiness, commercial traction, legal ownership or
+  cap table, final recommendation cannot exceed thesis-tracking unless a human override is
+  recorded.
+```
 
 ---
 
@@ -1476,6 +1587,12 @@ D — Human approval
 
 E — Repair Log
 | issue_id | stage | location | issue_type | original_text | repaired_text | rule_triggered | residual_gap | status |
+
+F — Disconfirming Evidence (§10B)
+| item | evidence_found | source | date | severity | relevance | action |
+
+G — Evidence Gap Register (§10C)
+| gap_id | missing_evidence | affected_stage | affected_conclusion | severity | current_treatment | required_source | decision_impact |
 ```
 
 ## 26. What this is and is not
