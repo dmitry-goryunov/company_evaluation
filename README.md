@@ -1,6 +1,6 @@
 # Company Evaluation Pipeline
 
-A structured, evidence-graded company research framework for [Claude Code](https://claude.ai/code). It runs a 16-stage pipeline — financial spine, capital structure, business model, management track record, market position, valuation, scenarios — and produces a final investment memo with a fully traceable facts ledger.
+A structured, evidence-graded company research framework for [Claude Code](https://claude.ai/code). It runs a 17-stage pipeline (16 core stages + C0 claim-audit gate) — financial spine, capital structure, business model, management track record, market position, valuation, scenarios — and produces a final investment memo with a fully traceable facts ledger.
 
 The pipeline integrates with **Google NotebookLM** as its document Q&A backend, so all answers are grounded in the source documents you upload rather than Claude's training data.
 
@@ -213,12 +213,12 @@ The pipeline adapts to different research objectives. At the start of a run, sel
 
 | Objective | Key mandatory stages |
 |---|---|
-| Public equity investment | A1, B1, B2, B6, C1–C9 |
-| Private investment / VC / growth | A1, B1–B6, C1–C9 |
+| Public equity investment | A1, B1, B2, B6, C0–C9 |
+| Private investment / VC / growth | A1, B1–B6, C0–C9 |
 | Credit / lending | A1, B1, C3, C7 |
-| M&A target diligence | A1, B1–B6, C1–C9 |
+| M&A target diligence | A1, B1–B6, C0–C9 |
 | Supplier / vendor diligence | A1, B1, B4, B5, B6, C7 |
-| General company profile | A1, B1, B3, B6, C1, C9-lite |
+| General company profile | A1, B1, B3, B6, C0, C1, C9-lite |
 
 ---
 
