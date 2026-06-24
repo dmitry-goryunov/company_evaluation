@@ -865,10 +865,12 @@ register; management questions; evidence that would change the conclusion; sourc
 - Source limitations and evidence gaps must be stated.
 - **If any high-stakes mandate question is not answerable, the memo says so and cannot present a
   high-conviction conclusion.**
-- **Zero-open closure gate (adapted from GSD-core's `threats_open: 0` ship gate):** no undisclosed HIGH
-  item may pass. Every HIGH risk-register entry (C7) and every `evidence_gaps.md` entry must be mitigated,
-  accepted-with-caveat, or explicitly disclosed in the memo. A machine-checkable "no undisclosed HIGH
-  items" condition must pass before C9 sign-off.
+- **C9 undisclosed-HIGH disclosure check:** no undisclosed HIGH item may pass into the final memo.
+  Every HIGH risk-register entry (C7) and every High or Critical `evidence_gaps.md` entry must be
+  mitigated, accepted with caveat, or explicitly disclosed in the memo. A machine-checkable
+  "no undisclosed HIGH items" condition must complete before C9 sign-off.
+  This is not an investment-decision pass. In AUTO mode, the correct wording is: "C9 disclosure
+  check completed with caveats; human review not performed; investment decision not approved."
 - **Decision-readiness status block (§8A.11) is mandatory** near the top of the memo.
 - The memo must not present a recommendation stronger than the cap set in C0 (§8A.9) unless the decision
   log records a human override.
@@ -934,27 +936,11 @@ These errors must be caught by the agent before human review.
 
 ### 10A.2 AUTO mode wording
 
-Replace all uses of `AUTO-APPROVED` with execution-status language.
+AUTO mode wording is governed by the Session Configuration section at the top of this document.
 
-Allowed AUTO labels:
+The rule is not repeated here to avoid drift: AUTO is an execution setting, not an approval setting. Stages may be marked `AUTO-RUN COMPLETE`, `AUTO-RUN COMPLETE WITH CAVEATS`, `AUTO-REPAIRED`, or `AUTO-BLOCKED`; they must not be marked as approved unless explicit human approval is recorded in `final/decision_log.md`.
 
-| Label | Meaning |
-|---|---|
-| AUTO-RUN COMPLETE | Stage executed without human pause; no material caveat found |
-| AUTO-RUN COMPLETE WITH CAVEATS | Stage executed; material gaps, confidence caps, or unresolved issues remain |
-| AUTO-BLOCKED | Stage cannot proceed under do-not-proceed rules |
-| AUTO-REPAIRED | A fixable inconsistency was found and corrected before human review |
-| HUMAN-REVIEW REQUIRED | Judgement gate not performed by the agent |
-| NOT DECISION-APPROVED | No investment decision has been approved |
-
-Prohibited AUTO labels:
-- AUTO-APPROVED
-- gate approved
-- final memo approved
-- investment approved
-- zero-open closure passed, unless every HIGH risk and load-bearing gap is either mitigated, accepted with caveat, or explicitly disclosed
-
-AUTO mode is an execution setting, not an approval setting.
+The C9 linter must search for prohibited approval language, including `AUTO-APPROVED`, `gate approved`, `final memo approved`, and `investment approved`.
 
 ### 10A.3 Mandatory repair loop before every human checkpoint
 
@@ -1242,6 +1228,12 @@ Required output: `working/disconfirming_evidence.md`
 
 ### Search terms
 
+Adapt the search terms to the research objective and sector. For confidential, private-company,
+data-room, supplier, customer, or partnership diligence, do not run public internet searches using
+confidential names, project code names, customer names, non-public allegations, or sensitive transaction
+details unless the user has authorised external search. Use internal data-room sources first and record
+any public-search limitation in `working/disconfirming_evidence.md`.
+
 Run the following searches against available sources, NotebookLM, and internet sources:
 
 ```text
@@ -1261,6 +1253,17 @@ Run the following searches against available sources, NotebookLM, and internet s
 [Company] environmental permit objection
 [Company] financing failed
 ```
+
+Objective-specific additions:
+
+| Objective | Add adverse-search terms |
+|---|---|
+| Public equity | short report, placing, dilution, auditor qualification, regulatory investigation, suspension, delisting |
+| Private / VC / growth | churn, customer loss, failed pilot, bridge round, down round, founder dispute, unpaid invoices |
+| Credit / lending | covenant breach, default, arrears, winding-up petition, security dispute, going concern |
+| M&A target | litigation, customer termination, IP dispute, tax claim, employee claims, change-of-control blocker |
+| Supplier / vendor | service outage, breach, certification loss, insolvency, sanctions, cyber incident |
+| Strategic partnership / JDA | IP ownership dispute, failed trial, exclusivity conflict, partner termination, regulatory blocker |
 
 ### Output template
 
