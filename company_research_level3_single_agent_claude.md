@@ -869,6 +869,7 @@ register; management questions; evidence that would change the conclusion; sourc
   Every HIGH risk-register entry (C7) and every High or Critical `evidence_gaps.md` entry must be
   mitigated, accepted with caveat, or explicitly disclosed in the memo. A machine-checkable
   "no undisclosed HIGH items" condition must complete before C9 sign-off.
+
   This is not an investment-decision pass. In AUTO mode, the correct wording is: "C9 disclosure
   check completed with caveats; human review not performed; investment decision not approved."
 - **Decision-readiness status block (§8A.11) is mandatory** near the top of the memo.
@@ -940,7 +941,7 @@ AUTO mode wording is governed by the Session Configuration section at the top of
 
 The rule is not repeated here to avoid drift: AUTO is an execution setting, not an approval setting. Stages may be marked `AUTO-RUN COMPLETE`, `AUTO-RUN COMPLETE WITH CAVEATS`, `AUTO-REPAIRED`, or `AUTO-BLOCKED`; they must not be marked as approved unless explicit human approval is recorded in `final/decision_log.md`.
 
-The C9 linter must search for prohibited approval language, including `AUTO-APPROVED`, `gate approved`, `final memo approved`, and `investment approved`.
+The C9 linter must search for prohibited approval language, including `AUTO-APPROVED`, `gate approved`, `final memo approved`, `investment approved`, and `zero-open closure passed`.
 
 ### 10A.3 Mandatory repair loop before every human checkpoint
 
@@ -1228,11 +1229,7 @@ Required output: `working/disconfirming_evidence.md`
 
 ### Search terms
 
-Adapt the search terms to the research objective and sector. For confidential, private-company,
-data-room, supplier, customer, or partnership diligence, do not run public internet searches using
-confidential names, project code names, customer names, non-public allegations, or sensitive transaction
-details unless the user has authorised external search. Use internal data-room sources first and record
-any public-search limitation in `working/disconfirming_evidence.md`.
+Adapt the search terms to the research objective and sector. For confidential, private-company, data-room, supplier, customer, partnership, credit or M&A diligence, do not run public internet searches using confidential names, project code names, customer names, non-public allegations, transaction details or sensitive commercial facts unless the user has authorised external search. Use internal data-room sources first and record any public-search limitation in `working/disconfirming_evidence.md`.
 
 Run the following searches against available sources, NotebookLM, and internet sources:
 
@@ -1264,6 +1261,10 @@ Objective-specific additions:
 | M&A target | litigation, customer termination, IP dispute, tax claim, employee claims, change-of-control blocker |
 | Supplier / vendor | service outage, breach, certification loss, insolvency, sanctions, cyber incident |
 | Strategic partnership / JDA | IP ownership dispute, failed trial, exclusivity conflict, partner termination, regulatory blocker |
+| M&A buyer screening | failed acquisition, integration failure, antitrust issue, funding constraint, shareholder opposition |
+| Customer / competitor intelligence | customer churn, pricing pressure, product recall, layoffs, channel conflict, negative reviews |
+| Distressed / restructuring | default, creditor action, winding-up petition, covenant breach, asset seizure, unpaid tax |
+| Governance / fraud-risk | auditor resignation, related-party transaction, board resignation, regulator action, accounting restatement |
 
 ### Output template
 
