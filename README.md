@@ -116,7 +116,7 @@ Claude will read the pipeline specification. It will then ask you:
 | Mode | Description | When to use |
 |---|---|---|
 | **MANUAL** | Claude pauses at each of the 5 human gates and waits for your explicit approval before proceeding | Default — use when actively reviewing |
-| **AUTO** | Claude auto-approves all gates, saves all artefacts, and runs continuously to the final memo | Use when you want a first-pass draft without interruptions |
+| **AUTO** | Claude runs stages without human pauses, records checkpoint packets, runs the self-repair loop, and marks each stage as `AUTO-RUN COMPLETE`, `AUTO-RUN COMPLETE WITH CAVEATS`, `AUTO-REPAIRED`, or `AUTO-BLOCKED`. AUTO mode is an execution setting, not an approval setting. | Use when you want continuous execution — the final output requires human review before any investment decision. |
 
 ### 3d. Collect and upload source documents
 
@@ -237,7 +237,7 @@ A Screen automatically escalates to Standard if it finds: pre-revenue company, g
 ## Limitations
 
 - This pipeline produces a research memo and an evidence record. **It does not produce an automatic investment decision.**
-- AUTO mode removes human review at the gates — treat AUTO output as a first-pass draft.
+- AUTO mode is an execution setting, not an approval setting. The output is a research artefact that requires human review before any investment decision. Running AUTO removes live human challenge at the gates; the final output must state that human judgement was not performed.
 - The reliability of the output depends on the quality and completeness of the source documents you upload to NotebookLM.
 - The deterministic Python checks verify internal consistency; they do not substitute for a full audit.
 

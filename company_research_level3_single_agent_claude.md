@@ -4,20 +4,49 @@
 
 ## Session Configuration — set before running
 
-```
+```text
 GATE_MODE = MANUAL        # MANUAL | AUTO
 ```
 
 | Mode | Behaviour |
 |---|---|
-| **MANUAL** | Agent pauses at every human checkpoint (Gates #1–#5) and waits for explicit "approve / approve with caveats / request revision / add sources / halt" before proceeding. Default. |
-| **AUTO** | Agent auto-approves all checkpoints, records them as "AUTO-APPROVED", and proceeds immediately without pausing. All artefacts are still saved. Use when you want continuous execution and will review the full output at the end. |
+| **MANUAL** | Agent pauses at every human checkpoint and waits for explicit "approve / approve with caveats / request revision / add sources / halt" before proceeding. Default. |
+| **AUTO** | Agent runs stages continuously without human pauses. It records checkpoint packets, runs the relevant self-repair loop, and marks each stage as `AUTO-RUN COMPLETE`, `AUTO-RUN COMPLETE WITH CAVEATS`, `AUTO-REPAIRED`, or `AUTO-BLOCKED`. AUTO mode never means judgement approval, recommendation approval, or investment-decision approval. |
 
-**At the start of each run, ask the user:** *"Run in MANUAL mode (pause at each gate for your approval) or AUTO mode (run all stages continuously and show you the final output)?"*
+**At the start of each run, ask the user:** "Run in MANUAL mode, or AUTO mode?"
 
-> **AUTO mode warning:** The reliability of this pipeline comes partly from human review at the gates.
-> Running in AUTO mode removes that check — the output should be treated as a first-pass draft
-> requiring human review before any investment decision is made.
+> **AUTO mode warning:** AUTO is an execution setting, not an approval setting. The output is a research artefact for human review. It is not an investment decision. Running in AUTO mode removes live human challenge at the gates, so the final output must explicitly state that human judgement was not performed unless a later review is recorded in `decision_log.md`.
+
+### AUTO status labels
+
+| Label | Meaning |
+|---|---|
+| `AUTO-RUN COMPLETE` | Stage executed without human pause; no material caveat found |
+| `AUTO-RUN COMPLETE WITH CAVEATS` | Stage executed; material gaps, confidence caps, or unresolved issues remain |
+| `AUTO-REPAIRED` | Fixable inconsistency was found and corrected before human review |
+| `AUTO-BLOCKED` | Stage cannot proceed under the do-not-proceed rules |
+| `HUMAN-REVIEW REQUIRED` | Judgement gate has not been performed |
+| `NOT DECISION-APPROVED` | No investment decision has been approved |
+
+Prohibited AUTO wording:
+
+```text
+AUTO-APPROVED
+gate approved
+final memo approved
+investment approved
+zero-open closure passed
+```
+
+The phrase "zero-open closure passed" may be used only if every HIGH risk and every load-bearing evidence gap is mitigated, accepted with caveat, or explicitly disclosed. Otherwise use: "C9 disclosure check completed with caveats."
+
+Required AUTO final wording:
+
+```text
+AUTO-run; human review not performed; investment decision not approved.
+```
+
+If human review later occurs, record the reviewer, decision, caveats, and follow-up in `final/decision_log.md`.
 
 ### Resuming a paused pipeline
 
