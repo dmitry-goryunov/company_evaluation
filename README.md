@@ -60,7 +60,7 @@ Running the full pipeline on a public equity target gives you:
 | `working/checks/B2_capital_structure.py` | 4-step cap table check: bridge → instruments → FD → valuation |
 | `working/checks/C2_valuation.py` | Valuation multiples locked to fully-diluted share count |
 | `notebooklm_outputs/raw/` | Raw NotebookLM responses for every stage (immutable) |
-| `C9_final_memo.md` | Final investment research memo with scenario analysis |
+| `final/memo.md` (+ `.docx`, `.pdf`) | Final investment research memo with scenario analysis |
 
 ---
 
@@ -234,12 +234,12 @@ The pipeline creates the following structure in your working directory:
 ```
 [Company Name]/
 ├── pipeline.md                          # Stage tracker + decision log
-├── C9_final_memo.md                     # Final investment memo
 ├── sources/
 │   ├── source_register.csv              # All sources with IDs and paths
 │   └── raw/                             # Downloaded PDFs and documents
 ├── working/
 │   ├── facts_ledger.md                  # Append-only evidence ledger
+│   ├── assumptions_log.md               # Assumptions log
 │   ├── evidence_gaps.md                 # Open evidence gaps (with severity labels)
 │   ├── disconfirming_evidence.md        # Adverse search results
 │   ├── open_questions.md                # Unresolved questions
@@ -252,11 +252,14 @@ The pipeline creates the following structure in your working directory:
 │       └── C2_valuation.py              # Valuation multiples
 ├── final/
 │   ├── memo.md / memo.docx / memo.pdf   # Final investment memo
+│   ├── mandate_coverage.md              # Mandate coverage table
 │   ├── decision_log.md                  # All gate decisions and repair entries
 │   ├── post_run_lessons.md              # Post-run learning review
 │   └── proposed_process_patch.md        # Any proposed canonical process update
-└── notebooklm_outputs/
-    └── raw/                             # Immutable NotebookLM responses per stage
+├── notebooklm_outputs/
+│   ├── raw/                             # Immutable NotebookLM responses per stage
+│   └── revised/                         # Revised NotebookLM outputs
+└── process_change_log.md                # Canonical process change log
 ```
 
 ---
@@ -272,7 +275,7 @@ The pipeline adapts to different research objectives. At the start of a run, sel
 | Credit / lending | A1, B1, C3, C7 |
 | M&A target diligence | A1, B1–B6, C0–C9 |
 | Supplier / vendor diligence | A1, B1, B4, B5, B6, C7 |
-| General company profile | A1, B1, B3, B6, C0, C1, C9-lite |
+| General company profile | A1, B1, B3, B6, C1, C7, C9-lite |
 
 ---
 
