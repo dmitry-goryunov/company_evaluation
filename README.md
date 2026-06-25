@@ -195,7 +195,7 @@ Claude Code will run each stage sequentially:
 |---|---|---|
 | **A — Scope & source integrity** | A1 | Checks if the research mandate is answerable from your sources. Halts if not. |
 | **B — Evidence spine** | B1–B6 | Financial spine → cap table → business model → asset evidence → management track record. Python scripts verify every key number. |
-| **C — Judgement** | C0–C9 | Claim audit & confidence caps (C0) → market/competition → valuation → capital requirements → scenarios → final memo |
+| **C — Judgement** | C0–C9 | Claim audit (C0) → market/competition → capital requirements → scenarios → valuation → M&A/comps → risks → management questions → final memo |
 
 At each human gate (MANUAL mode), Claude will present a structured checkpoint packet and wait for one of:
 - `approve` — proceed to next stage

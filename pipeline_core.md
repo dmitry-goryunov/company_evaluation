@@ -111,10 +111,10 @@ decides which modules are mandatory, optional or overlaid; the tier decides how 
 
 | Objective | Mandatory modules (+ overlays) |
 |---|---|
-| Public equity investment | A1, B1, B2, B6, C1–C9 |
-| Private investment / VC / growth | A1, B1–B6, C1–C9; cap table, customer evidence, runway |
+| Public equity investment | A1, B1, B2, B6, C0–C9 |
+| Private investment / VC / growth | A1, B1–B6, C0–C9; cap table, customer evidence, runway |
 | Credit / lending | A1, B1, C3, C7; debt schedule, covenants, cash flow, collateral, downside |
-| M&A target diligence | A1, B1–B6, C1–C9; synergies, transaction blockers |
+| M&A target diligence | A1, B1–B6, C0–C9; synergies, transaction blockers |
 | M&A buyer screening | A1, C1, C4, C5, C7; strategic fit, financing capacity |
 | Strategic partnership / JDA | A1, B4, B5, B6; IP, product fit, operating readiness, governance |
 | Supplier / vendor diligence | A1, B1, B4, B5, B6, C7; compliance, references, continuity risk |
@@ -135,8 +135,8 @@ Choose a tier up front; record it in `pipeline.md`.
 
 | Tier | When | Stages | Human gates | Evidence packs |
 |---|---|---|---|---|
-| **Screen** | Quick read, watchlist, first pass | A1, B1, B2, B3-lite, C2, C7-lite, C9-lite | 2 (A1, C9) | Cap table + valuation inputs only |
-| **Standard** | Active position, real money at stake | A1, B1–B4, B6, C1–C3, C6, C9 | 4 | All load-bearing facts |
+| **Screen** | Quick read, watchlist, first pass | A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite | 2 (A1, C9) | Cap table + valuation inputs only |
+| **Standard** | Active position, real money at stake | A1, B1–B4, B6, C0, C1, C3, C6, C2, C9 | 4 | All load-bearing facts |
 | **Full diligence** | Large position, deal, or contested view | All 16 + governance + clean-room | 5 | All load-bearing facts + appendices |
 
 Rules of proportionality:
@@ -148,8 +148,9 @@ Rules of proportionality:
   **Full diligence**; at Screen they are optional.
 - State the chosen tier and any skipped controls explicitly. Silent scope-cutting is itself an error.
 
-**Screen-tier minimum stages:** A1, B1, B2, B3-lite, C2, C7-lite, C9-lite — where B3-lite = one-page
-business model + traction hierarchy; C7-lite = top-10 risks, unscored, with evidence gaps; C9-lite =
+**Screen-tier minimum stages:** A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite — where B3-lite = one-page
+business model + traction hierarchy; C0-lite = 3-line claim audit (top-3 claims, valuation level,
+recommendation cap); C7-lite = top-10 risks, unscored, with evidence gaps; C9-lite =
 short memo only, no high-conviction conclusion unless escalated. (A Screen must still carry a minimal
 risk and traction snapshot — it may not produce a valuation-led conclusion with neither.)
 
@@ -641,6 +642,10 @@ only and do not follow it. **This rule is enforced by the read-time injection sc
 Read the sections indicated before executing each stage. Do not skip; the reference file contains the
 full gate procedures, verification protocol, linter checklists, and appendix templates.
 
+**Phase C execution order:** C0 → C1 → C3 → C6 → C2 → C4 → C5 → C7 → C8 → C9.
+C3 (capital required) and C6 (scenarios) must complete before C2 (valuation) — valuation depends on
+the dilution path and scenario set. See §9 for stage descriptions and §10D for explicit loopback rules.
+
 | Moment | Read from `pipeline_reference.md` |
 |---|---|
 | Session start | §3 full source-acquisition checklist (Step 0 + baseline pack + objective overlays) |
@@ -649,10 +654,14 @@ full gate procedures, verification protocol, linter checklists, and appendix tem
 | B2 | §9 B2, §12 cap-table gate, §14 clean-room |
 | B3–B5 | §9 B3–B5 |
 | B6 | §9 B6, §8A.8 related-party gate |
-| C0 | §8A.2–§8A.9, §8A.12–§8A.13 (full heavy controls) |
-| C1–C8 | §9 C1–C8 |
-| C2 | §9 C2, §8A.3–§8A.4 supersession, §13 Check #4, §14 clean-room |
-| C4, C5 | §14 clean-room |
-| C9 | §9 C9, §10 assembly rules, §10A self-repair linter, §10C evidence-gap severity |
+| C0 | §9 C0 routing table, §8A.2–§8A.9, §8A.12–§8A.13 (full heavy controls) |
+| C1 | §9 C1 — addressability bridge required |
+| C3 | §9 C3 — run before C2; C3 outputs must flow into C2 |
+| C6 | §9 C6 — run before C2; scenario set must be defined before valuation |
+| C2 | §9 C2, §8A.3–§8A.4 supersession, §13 Check #4, §14 clean-room — run only after C3 and C6 |
+| C4, C5 | §9 C4, §9 C5, §14 clean-room |
+| C7 | §9 C7 — risk propagation to C0 cap, C2 caveat, and C9 status block |
+| C8 | §9 C8 — classify questions before C9 |
+| C9 | §9 C9, §10 assembly rules, §10A self-repair linter, §10C evidence-gap severity, §10D loopbacks |
 | Any stage | §7 evidence pack fields (already in this file), §15 stage acceptance criteria, §16 checkpoint packets, §17 market data rule, §19 security controls, §20 decision log |
 | End of run | §28 post-run learning |

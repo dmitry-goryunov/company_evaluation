@@ -5,7 +5,7 @@
 > - `pipeline_reference.md` (canonical — reference, read by section on demand)
 >
 > To update this file, edit the canonical sources and re-run `python build_dist.py`.
-> Generated: 2026-06-25 13:37 UTC
+> Generated: 2026-06-25 14:20 UTC
 
 ---
 
@@ -122,10 +122,10 @@ decides which modules are mandatory, optional or overlaid; the tier decides how 
 
 | Objective | Mandatory modules (+ overlays) |
 |---|---|
-| Public equity investment | A1, B1, B2, B6, C1–C9 |
-| Private investment / VC / growth | A1, B1–B6, C1–C9; cap table, customer evidence, runway |
+| Public equity investment | A1, B1, B2, B6, C0–C9 |
+| Private investment / VC / growth | A1, B1–B6, C0–C9; cap table, customer evidence, runway |
 | Credit / lending | A1, B1, C3, C7; debt schedule, covenants, cash flow, collateral, downside |
-| M&A target diligence | A1, B1–B6, C1–C9; synergies, transaction blockers |
+| M&A target diligence | A1, B1–B6, C0–C9; synergies, transaction blockers |
 | M&A buyer screening | A1, C1, C4, C5, C7; strategic fit, financing capacity |
 | Strategic partnership / JDA | A1, B4, B5, B6; IP, product fit, operating readiness, governance |
 | Supplier / vendor diligence | A1, B1, B4, B5, B6, C7; compliance, references, continuity risk |
@@ -146,8 +146,8 @@ Choose a tier up front; record it in `pipeline.md`.
 
 | Tier | When | Stages | Human gates | Evidence packs |
 |---|---|---|---|---|
-| **Screen** | Quick read, watchlist, first pass | A1, B1, B2, B3-lite, C2, C7-lite, C9-lite | 2 (A1, C9) | Cap table + valuation inputs only |
-| **Standard** | Active position, real money at stake | A1, B1–B4, B6, C1–C3, C6, C9 | 4 | All load-bearing facts |
+| **Screen** | Quick read, watchlist, first pass | A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite | 2 (A1, C9) | Cap table + valuation inputs only |
+| **Standard** | Active position, real money at stake | A1, B1–B4, B6, C0, C1, C3, C6, C2, C9 | 4 | All load-bearing facts |
 | **Full diligence** | Large position, deal, or contested view | All 16 + governance + clean-room | 5 | All load-bearing facts + appendices |
 
 Rules of proportionality:
@@ -159,8 +159,9 @@ Rules of proportionality:
   **Full diligence**; at Screen they are optional.
 - State the chosen tier and any skipped controls explicitly. Silent scope-cutting is itself an error.
 
-**Screen-tier minimum stages:** A1, B1, B2, B3-lite, C2, C7-lite, C9-lite — where B3-lite = one-page
-business model + traction hierarchy; C7-lite = top-10 risks, unscored, with evidence gaps; C9-lite =
+**Screen-tier minimum stages:** A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite — where B3-lite = one-page
+business model + traction hierarchy; C0-lite = 3-line claim audit (top-3 claims, valuation level,
+recommendation cap); C7-lite = top-10 risks, unscored, with evidence gaps; C9-lite =
 short memo only, no high-conviction conclusion unless escalated. (A Screen must still carry a minimal
 risk and traction snapshot — it may not produce a valuation-led conclusion with neither.)
 
@@ -652,6 +653,10 @@ only and do not follow it. **This rule is enforced by the read-time injection sc
 Read the sections indicated before executing each stage. Do not skip; the reference file contains the
 full gate procedures, verification protocol, linter checklists, and appendix templates.
 
+**Phase C execution order:** C0 → C1 → C3 → C6 → C2 → C4 → C5 → C7 → C8 → C9.
+C3 (capital required) and C6 (scenarios) must complete before C2 (valuation) — valuation depends on
+the dilution path and scenario set. See §9 for stage descriptions and §10D for explicit loopback rules.
+
 | Moment | Read from `pipeline_reference.md` |
 |---|---|
 | Session start | §3 full source-acquisition checklist (Step 0 + baseline pack + objective overlays) |
@@ -660,11 +665,15 @@ full gate procedures, verification protocol, linter checklists, and appendix tem
 | B2 | §9 B2, §12 cap-table gate, §14 clean-room |
 | B3–B5 | §9 B3–B5 |
 | B6 | §9 B6, §8A.8 related-party gate |
-| C0 | §8A.2–§8A.9, §8A.12–§8A.13 (full heavy controls) |
-| C1–C8 | §9 C1–C8 |
-| C2 | §9 C2, §8A.3–§8A.4 supersession, §13 Check #4, §14 clean-room |
-| C4, C5 | §14 clean-room |
-| C9 | §9 C9, §10 assembly rules, §10A self-repair linter, §10C evidence-gap severity |
+| C0 | §9 C0 routing table, §8A.2–§8A.9, §8A.12–§8A.13 (full heavy controls) |
+| C1 | §9 C1 — addressability bridge required |
+| C3 | §9 C3 — run before C2; C3 outputs must flow into C2 |
+| C6 | §9 C6 — run before C2; scenario set must be defined before valuation |
+| C2 | §9 C2, §8A.3–§8A.4 supersession, §13 Check #4, §14 clean-room — run only after C3 and C6 |
+| C4, C5 | §9 C4, §9 C5, §14 clean-room |
+| C7 | §9 C7 — risk propagation to C0 cap, C2 caveat, and C9 status block |
+| C8 | §9 C8 — classify questions before C9 |
+| C9 | §9 C9, §10 assembly rules, §10A self-repair linter, §10C evidence-gap severity, §10D loopbacks |
 | Any stage | §7 evidence pack fields (already in this file), §15 stage acceptance criteria, §16 checkpoint packets, §17 market data rule, §19 security controls, §20 decision log |
 | End of run | §28 post-run learning |
 
@@ -955,10 +964,10 @@ only when A1 marks it high-stakes.
 - **B4. Product / service evidence map.** Every claim: wording, source, evidence type, status, missing
   proof. Hardware/medical: sample size, batches, conditions, duration, who tested, protocol disclosed?,
   customer-tested vs third-party vs certified, lab/pilot/field/production. SaaS: usage, retention,
-  churn, deployment, uptime, security/compliance, cohorts, integration. *Human checkpoint #3.*
+  churn, deployment, uptime, security/compliance, cohorts, integration.
 - **B5. Operational readiness.** Output a classification (concept/prototype/pilot/early-commercial/
   scaling/mature/declining/restructuring) with evidence for, against, what upgrades it, what
-  downgrades it.
+  downgrades it. *Human checkpoint #3.*
 - **B6. Management claims-vs-outcomes + governance.** Milestone timeline (achieved/delayed/reframed/
   dropped/unresolved/contradicted/pending + evidence quality). Guidance reliability (qualitative:
   strong/mixed/weak/insufficient) by financial/commercial/product-technical/operational/financing.
@@ -966,6 +975,12 @@ only when A1 marks it high-stakes.
   shareholder concentration, incentives, auditor issues, controversies, litigation/regulatory.
 
 ### Phase C — Judgement (discrete gates)
+
+**Execution order:** C0 → C1 → C3 → C6 → C2 → C4 → C5 → C7 → C8 → C9. C3 (capital required) and
+C6 (scenarios) run before C2 (valuation) because valuation must price defined scenarios and reflect the
+known dilution path. C4 and C5 run after C2 as overlays and sanity checks. Stage descriptions below
+are in label order for reference lookup.
+
 > **Standing answerability gate:** before any Phase C stage passes, confirm that no open question in
 > `open_questions.md` is load-bearing to that stage's conclusion (or is explicitly labelled
 > non-blocking). A1's answerability check is re-applied per judgement stage, not only once.
@@ -975,31 +990,112 @@ only when A1 marks it high-stakes.
   evidence level (§8A.5) and product/commercial maturity cap (§8A.6); translate any policy tailwind
   (§8A.7); set the recommendation cap. Output `working/claim_audit.md` (Screen: 3-line form). A claim
   found unknown, unsupported, superseded or not-usable-for-decision forces the dependent stage to
-  revert, downgrade or label unresolved.
+  revert, downgrade or label unresolved. **C0 must not merely list weaknesses — it must route each
+  failed or capped claim using the table below.**
+
+  | Claim issue | Required route |
+  |---|---|
+  | Unknown | Return to relevant source or B-stage, or mark decision-not-ready |
+  | Unsupported | Remove, downgrade, or return to source acquisition |
+  | Superseded | Replace with current source or label historical context only |
+  | Not usable for decision | Cap C2/C9 language; record in decision-readiness status block |
+  | Gross/attributable basis unclear | Return to B1/B2/B6 before valuation |
+  | Maturity cap below decision-ready | C2 and C9 must use capped wording |
 - **C1. Market & competition** (+ dated overlay). Each market-size claim: source, methodology,
   geography, segment definition, TAM/SAM/SOM, does the company serve the defined market, double-
-  counting risk.
-- **C2. Valuation.** Method **appropriateness table** (method | appropriate? | why | required evidence |
-  misuse risk). Pull the FD number from B2; re-assert FD-gap reconciliation. **State the share basis
-  used** (basic/FD_low/FD_base/FD_high); if basic, justify. Scenario probabilities labelled
-  evidence-based or illustrative. *Human checkpoint #4.*
-- **C3. Capital required** (bridge/base/scale/downside). Treat working capital, capex, debt maturity,
-  leases, covenant/default, minimum liquidity, restructuring costs, dilution sensitivity, non-dilutive
-  options, and revenue delayed by 6/12/18 months.
-- **C4. M&A & strategic options.** Buyer-evidence levels: (1) confirmed interest; (2) disclosed
-  strategic review; (3) signed partnership with acquisition/investment rights; (4) strategic
-  relationship, no rights; (5) logical category only; (6) speculative name. *Clean-room candidate.*
+  counting risk. **Required addressability bridge for every market-size claim used in valuation:**
+  market size claim → relevant segment → geography → customer type → company evidence of access →
+  current evidence gap. C1 may not allow a large TAM/SAM/SOM to support valuation unless the
+  company's access to that market is evidenced by contracts, pilots, customer relationships, or other
+  primary-source evidence.
+- **C2. Valuation.** **Run only after C3 (capital required) and C6 (scenarios) have passed.** If run
+  before C3 and C6, the output must be explicitly labelled preliminary and not decision-ready.
+  Required inherited inputs: B1 verified financial spine; B2 allowed share-count basis; C1
+  addressable-market bridge; C3 capital and dilution path; C6 scenario set; C0 valuation evidence
+  level and recommendation cap.
+
+  **C2 may not choose a share-count basis independently** — it must inherit the allowed basis from B2:
+  basic, FD_low, FD_base, FD_high, or not usable.
+
+  Method **appropriateness table** (method | appropriate? | why | required evidence | misuse risk).
+  Pull the FD number from B2; re-assert FD-gap reconciliation. **State the share basis used**
+  (basic/FD_low/FD_base/FD_high); if basic, justify. Scenario probabilities labelled evidence-based
+  or illustrative.
+
+  **Valuation permission table** — complete before proceeding:
+
+  | Input | Status | If failed |
+  |---|---|---|
+  | Latest financials verified | yes / no | valuation blocked or capped |
+  | Share count and FD basis verified | yes / no | per-share valuation blocked |
+  | Capital need estimated (C3) | yes / no | valuation capped |
+  | Scenario assumptions defined (C6) | yes / no | valuation blocked or scenario-only |
+  | Market data refreshed | yes / no | valuation stale |
+  | Valuation evidence level assigned | 0–6 | recommendation capped per §8A.5 |
+
+  *Human checkpoint #4.*
+- **C3. Capital required** (bridge/base/scale/downside). **Run before C2.** Required outputs:
+  current cash and burn; runway; bridge/base/scale/downside funding need; likely financing instrument;
+  expected dilution range; covenant/default/maturity calendar where relevant; financing evidence
+  quality; whether the company is funding-constrained before its next value milestone. Also treat
+  working capital, capex, debt maturity, leases, covenant/default, minimum liquidity, restructuring
+  costs, dilution sensitivity, non-dilutive options, and revenue delayed by 6/12/18 months.
+
+  **Rule:** if C3 identifies a material unfunded capital need, C2 valuation must show pro-forma
+  dilution or explicitly state that the valuation is pre-financing and not decision-ready.
+- **C4. M&A & strategic options.** M&A buyer logic may support strategic optionality but may not
+  support valuation unless buyer evidence is Level 3 or better. *Clean-room candidate.*
+
+  **Buyer-evidence levels:**
+
+  | Level | Evidence |
+  |---|---|
+  | 0 | No buyer evidence |
+  | 1 | Logical strategic counterparty only |
+  | 2 | Prior sector transactions or stated acquisition strategy |
+  | 3 | Direct relationship, JDA, customer relationship, investment or disclosed engagement |
+  | 4 | Formal process, bid, approach, term sheet or credible press report |
+  | 5 | Binding transaction evidence |
+
+  If buyer evidence is Level 0–2, C9 must not imply likely acquisition.
 - **C5. Listing venue & comparables.** Classify each comp (true product / business-model / stage /
-  sentiment / financing / M&A); no mechanical multiples unless the comp type supports it. State: a
-  listing-venue change may help access/liquidity but does not by itself fix weak fundamentals, weak
-  revenue, technical risk, poor governance, or an immediate funding need. *Clean-room candidate.*
-- **C6. Bull / bear / base** — discrete. Each: facts, observations, inferences, assumptions, confirming
-  evidence, disproving evidence, expected financing path, expected dilution path.
+  sentiment / financing / M&A); no mechanical multiples unless the comp type supports it. Required
+  checks: liquidity; free float; shareholder-rights regime; index eligibility; exchange rule
+  constraints; reporting-standard differences; whether the listing change improves capital access or
+  merely changes optics. **Rule:** listing venue or peer multiple cannot override weak fundamentals,
+  immature evidence, unfunded capital need or unresolved dilution. State explicitly: a listing-venue
+  change may help access/liquidity but does not by itself fix weak fundamentals, weak revenue,
+  technical risk, poor governance, or an immediate funding need. *Clean-room candidate.*
+- **C6. Bull / bear / base** — discrete. **Run before C2.** Required outputs per scenario: core
+  operating assumption; capital assumption; dilution assumption; timing assumption; evidence supporting
+  the scenario; evidence against the scenario; falsifier (what single fact or event would eliminate
+  this scenario); valuation relevance (which multiple or DCF input this scenario drives). Also: facts,
+  observations, inferences, assumptions, confirming evidence, disproving evidence, expected financing
+  path, expected dilution path. **Rule:** the base case must be the most evidence-supported case, not
+  a midpoint between bull and bear.
 - **C7. Risk register** — discrete. Rank by severity, probability, detectability, time horizon,
-  mitigants, monitoring signal. Includes governance risks from B6.
-- **C8. Management questions** — discrete. Each: why it matters, answer that raises conviction, answer
-  that lowers it, who answers, what document/third party verifies it.
-- **C9. Final memo write-up** — see §10.
+  mitigants, monitoring signal. Includes governance risks from B6. **Mechanical cap:** any unresolved
+  High or Critical risk affecting valuation, ownership, legal status, financing, product readiness,
+  customer traction, regulatory status or going concern must propagate to: (1) C0 recommendation cap;
+  (2) C2 valuation caveat; (3) C9 decision-readiness status block; (4) C8 management questions if the
+  risk is answerable by the company. These propagations are mandatory, not discretionary.
+- **C8. Management questions** — discrete. Classify every question into one of three classes before
+  C9:
+
+  | Class | Treatment |
+  |---|---|
+  | Must-answer before decision | blocks C9 decision-ready conclusion if unresolved |
+  | Confidence-improving | disclosed as open but non-blocking |
+  | Monitoring only | does not block conclusion |
+
+  For each question: why it matters; answer that raises conviction; answer that lowers it; who
+  answers; what document/third party verifies it; class. **Rule:** any must-answer question unresolved
+  at C8 forces either return to source acquisition/A1 or C9 decision-not-ready.
+- **C9. Final memo write-up** — see §10. **Claim-surface diff (mandatory before emitting):** every
+  load-bearing claim in C9 must map to a Facts Ledger claim ID. If any load-bearing claim has no
+  Ledger ID, C9 must stop and return to the relevant earlier stage — this is a BLOCKED linter status.
+  C9 cannot soften an unresolved issue by moving it into "limitations" while preserving a stronger
+  conclusion elsewhere in the memo.
 
 ---
 
@@ -1245,6 +1341,15 @@ wording. Otherwise replace with weaker evidence-stated wording.
 - AUTO-run final output says "not decision-approved".
 ```
 
+#### I. Claim-surface completeness
+
+```text
+- Every load-bearing claim in the final memo maps to a Facts Ledger claim ID.
+- Any claim without a Ledger ID causes BLOCKED status; C9 must return to the relevant earlier stage.
+- No unresolved issue is softened by moving it to "limitations" while a stronger conclusion
+  appears elsewhere in the memo.
+```
+
 #### Summary: concrete required checks
 
 ```text
@@ -1264,7 +1369,8 @@ wording. Otherwise replace with weaker evidence-stated wording.
 - every HIGH risk and every load-bearing evidence gap is disclosed before C9 sign-off;
 - prohibited wording is removed or justified: buy, sell, hold, conviction, proven, validated,
   de-risked, fully funded, world-class, low-cost, near-term production, valuation floor,
-  strategic inevitability.
+  strategic inevitability;
+- every load-bearing claim maps to a Facts Ledger claim ID; if not, status is BLOCKED.
 ```
 
 ### 10A.6 Repair actions
@@ -1463,6 +1569,37 @@ Required output: `working/evidence_gaps.md`
 
 ---
 
+## §10D — Explicit loopback rules
+
+When a stage finding invalidates or undermines a prior or downstream stage, the pipeline must route
+explicitly rather than note the issue and continue. The following loopbacks are mandatory.
+
+| Trigger | Required loopback |
+|---|---|
+| A1 source gap | Return to Step 0 source acquisition; re-run A1 |
+| High-stakes A1 question not answerable | Halt until source added or mandate narrowed |
+| B1 financial conflict | Return to B1 verification; block C2 |
+| B1 cash roll-forward failure | Repair source extraction or label not fully checkable; block runway and valuation if material |
+| B2 share-count or FD issue | Return to B2; block per-share C2 |
+| B3 traction unsupported | Downgrade traction language; update C0 and C7 |
+| B4 product evidence immature | Apply maturity cap; update C0, C6 and C9 |
+| B5 operational readiness weak | Update C3, C6, C7 and C9 |
+| B6 management contradiction | Update C7 risk and C8 questions |
+| C0 failed or capped claim | Return to source or B-stage; downgrade; or mark unresolved per routing table |
+| C1 market access undemonstrated | Restrict or disable market-led valuation inputs |
+| C3 material unfunded capital need | Update B2 dilution, C6 scenarios and C2 valuation (pro-forma or not decision-ready) |
+| C6 scenario unsupported | Return to C6 or cap C2 to scenario-only output |
+| C2 valuation method inadmissible | Choose weaker method, scenario-only output, or decision-not-ready |
+| C4 M&A thesis unsupported (Level 0–2) | Downgrade to optionality only; C9 must not imply likely acquisition |
+| C5 listing or comps thesis unsupported | Downgrade to context only |
+| C7 High/Critical unresolved risk | Propagate cap to C0, C2 and C9; add to C8 if answerable |
+| C8 must-answer question unresolved | Return to source acquisition/A1 or C9 decision-not-ready |
+| C9 claim has no Facts Ledger ID | Stop C9; return to relevant earlier stage |
+| C9 introduces new evidence | Stop C9; return to relevant earlier stage |
+| Same load-bearing contradiction survives three repair cycles | Halt or human checkpoint |
+
+---
+
 # PART III — OPERATING PROCEDURE
 
 ## §11 — Primary-source verification protocol
@@ -1639,8 +1776,9 @@ share basis; escalation decisions; repair cycles run; final sign-off status.
 
 ## §23 — Human checkpoints (the 5 gates)
 
-A1 source sufficiency · B2 cap table · after-B4 product read · C2 valuation · C9 final memo. Each
-uses the checkpoint packet (§16) and records an approval (Appendix D).
+A1 source sufficiency · B2 cap table · after-B5 product and operational readiness · C2 valuation
+(after C3 and C6) · C9 final memo. Each uses the checkpoint packet (§16) and records an approval
+(Appendix D).
 
 ## §25 — Appendices (templates)
 
