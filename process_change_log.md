@@ -156,3 +156,82 @@
     `check_falsification_section`, `check_scenario_midpoint`, `check_liability_bridge`) and
     integrated into `lint()`. K1/K3/K4(midpoint) produce BLOCKED; K2/K5 produce ADVISORY
     (AUTO-REPAIRED if otherwise CLEAN).
+
+---
+
+| 2026-06-25 | patch-2026-06-25c | Five second-layer depth controls | Research memos can satisfy all K-check controls yet still (1) assume the company is exceptional without testing base rates, (2) capitalise adjusted EBITDA without testing recurring cash quality, (3) ignore incentive/control conflicts between stakeholders, (4) assume good future capital allocation without checking the historical record, and (5) produce static research with no expiry or monitoring plan. These are research-quality failures, not decision-discipline failures. | Harbour Energy plc (HBR) AUTO run, 2026-06-25, second-layer review | User (Second-Layer Depth Controls memo, 2026-06-25) | pipeline_core.md, pipeline_reference.md, checks/c9_policy_linter.py | Revert by reverting pipeline_core.md and pipeline_reference.md to commit 0a35d17; remove L-check functions from c9_policy_linter.py. |
+
+## Patch detail (patch-2026-06-25c)
+
+### Changes to pipeline_core.md
+
+1. **§8A.0 proportionality table** — Added rows for 8A.16–8A.20.
+
+2. **§8A.16 Reference-class and base-rate check** (new section) — Required output
+   `working/reference_class_base_rate.md` (7 fields). Gate: C9 must not imply exceptional
+   outcomes without this artefact. Cap wording if missing.
+
+3. **§8A.17 Quality of earnings and cash conversion** (new section) — Required output
+   `working/quality_of_earnings_cash_conversion.md` (10 fields). Gate: C2 may not capitalise
+   adjusted EBITDA or guided FCF without `sustainable_cash_flow` field completed.
+
+4. **§8A.18 Incentive and control map** (new section) — Required output
+   `working/incentive_control_map.md` (stakeholder table). Gate: C9 must not describe
+   governance as favourable without this artefact where triggering conditions exist.
+
+5. **§8A.19 Capital allocation record** (new section) — Required output
+   `working/capital_allocation_record.md` (10 categories). Gate: C2/C9 must not assume
+   value-accretive future capital allocation without historical record support.
+
+6. **§8A.20 Re-underwriting and monitoring protocol** (new section) — Required output
+   `working/monitoring_plan.md` (monitoring table). Gate: C9 without monitoring section
+   cannot be decision-ready except by human override.
+
+7. **§18 Do-not-proceed** — Six new bullets (exceptional language without reference class;
+   adjusted EBITDA capitalised without quality-of-earnings check; governance/alignment
+   conclusions without incentive map; capital allocation assumptions without record;
+   no monitoring section).
+
+8. **§21 C9 artefact-presence check list** — Added 5 new conditionally required artefacts.
+
+9. **§22 Directory structure** — Added 5 new working/ files.
+
+### Changes to pipeline_reference.md
+
+10. **B1 stage** — Added quality of earnings (§8A.17) and capital allocation record (§8A.19)
+    initiation requirement.
+
+11. **B2 stage** — Added incentive and control map (§8A.18) population requirement.
+
+12. **B6 stage** — Added capital allocation record completion and incentive/control map
+    confirmation requirement.
+
+13. **C1 stage** — Added reference-class check (§8A.16) population requirement; reference
+    class must inform C6 and C9.
+
+14. **C2 stage** — Added quality-of-earnings gate and capital-allocation gate: C2 may not
+    capitalise adjusted EBITDA/FCF without quality-of-earnings artefact; must not assume
+    value-accretive allocation without historical record.
+
+15. **C8 stage** — Added monitoring links: unanswered C8 questions tagged with monitoring-plan
+    rows; thesis falsifiers linked to monitoring plan.
+
+16. **§10 C9 memo structure** — Updated to include monitoring and re-underwriting plan;
+    decision-depth checks extended to §8A.14–§8A.20; Decision-depth checks block template
+    extended from 5 to 10 subsections.
+
+17. **§10A.5 section L** — Five new linter checks (L1–L5):
+    - L1 BLOCKED: exceptional-outcome language without reference class artefact
+    - L2 BLOCKED: EBITDA/FCF multiples without quality-of-earnings artefact
+    - L3 ADVISORY: control-structure triggers without incentive map
+    - L4 ADVISORY: capital allocation assumptions without record
+    - L5 BLOCKED: no monitoring section and no monitoring_plan.md
+
+18. **§10D loopback** — Six new loopback rows for L1–L5 triggers.
+
+### Changes to checks/c9_policy_linter.py
+
+19. Added five new check functions (`check_exceptional_language`, `check_ebitda_quality`,
+    `check_incentive_map`, `check_capital_allocation`, `check_monitoring_plan`) and
+    integrated into `lint()`. L1/L2/L5 produce BLOCKED; L3/L4 produce ADVISORY
+    (AUTO-REPAIRED if otherwise CLEAN).

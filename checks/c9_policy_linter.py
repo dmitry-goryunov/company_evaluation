@@ -87,6 +87,60 @@ MIDPOINT_PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+# L1 — exceptional-outcome phrases that require reference_class_base_rate.md
+EXCEPTIONAL_OUTCOME_PHRASES = [
+    r"\bexceptional\s+(?:outcome|return|performance|result|case)\b",
+    r"\bdurable\s+outperformance\b",
+    r"\bsuccessful\s+turnaround\b",
+    r"\bproven\s+turnaround\b",
+    r"\b(?:structural\s+)?re-?rating\b",
+    r"\bde-risking\b",
+    r"\bsustained\s+recovery\b",
+    r"\brecovery\s+(?:thesis|play|story|case)\b",
+]
+
+# L2 — EBITDA/FCF multiples that require quality_of_earnings artefact
+EBITDA_FCF_PHRASES = [
+    r"\bEV/EBITDA[X]?\b",
+    r"\bEBITDA\s+multiple\b",
+    r"\bEBITDA[X]?\s+multiple\b",
+    r"\bFCF\s+yield\b",
+    r"\bfree\s+cash\s+flow\s+yield\b",
+    r"\bcapitalis(?:ed|ing)\s+(?:adjusted\s+)?(?:earnings|EBITDA|FCF)\b",
+    r"\bguided\s+(?:free\s+cash\s+flow|FCF)\b",
+    r"\badjusted\s+FCF\b",
+]
+
+# L3 — control structure triggers requiring incentive_control_map.md
+CONTROL_STRUCTURE_PHRASES = [
+    r"\bcontrolling\s+shareholder\b",
+    r"\bdual.class\b",
+    r"\bnon.voting\s+shares?\b",
+    r"\bpreferred\s+equity\b",
+    r"\bsponsor\s+(?:exit|ownership|control|pressure)\b",
+    r"\bearn.?out\b",
+    r"\brelated.party\b",
+    r"\bmanagement\s+earnout\b",
+    r"\bcovenant\s+control\b",
+]
+
+# L4 — capital allocation assumption phrases requiring capital_allocation_record.md
+CAPITAL_ALLOCATION_PHRASES = [
+    r"\bdeleverage\b|\bdeleveraging\b",
+    r"\bshare\s+buy.?back\b|\bbuy.?back\b",
+    r"\bdividend\s+growth\b",
+    r"\bM&A\s+integration\b",
+    r"\bcapex\s+discipline\b",
+    r"\bvalue.accretive\s+(?:acquisition|reinvestment|capital)\b",
+    r"\breinvestment\s+success\b",
+]
+
+# L5 — monitoring section must exist in memo body
+MONITORING_SECTION_PATTERN = re.compile(
+    r"(?:monitoring|re.underwriting)\s+(?:plan|section|protocol)",
+    re.IGNORECASE,
+)
+
 
 def parse_yaml_block(text):
     """Extract c9_status_block YAML fields from memo text."""
@@ -214,6 +268,58 @@ def check_liability_bridge(body_text, memo_dir):
         content = bridge_file.read_text(encoding="utf-8", errors="replace")
         if re.search(r"share\s+denominator|per.share\s+output", content, re.IGNORECASE):
             return False
+    return True
+
+
+def check_exceptional_language(body_text, memo_dir):
+    """L1: exceptional-outcome language without reference_class_base_rate.md."""
+    hits = [p for p in EXCEPTIONAL_OUTCOME_PHRASES if re.search(p, body_text, re.IGNORECASE)]
+    if not hits:
+        return False
+    artefact = memo_dir / "working" / "reference_class_base_rate.md"
+    if not artefact.exists():
+        return True
+    content = artefact.read_text(encoding="utf-8", errors="replace")
+    return not bool(re.search(r"why_may_differ\s*:\s*\S", content, re.IGNORECASE))
+
+
+def check_ebitda_quality(body_text, memo_dir):
+    """L2: EBITDA/FCF multiples without quality_of_earnings artefact."""
+    hits = [p for p in EBITDA_FCF_PHRASES if re.search(p, body_text, re.IGNORECASE)]
+    if not hits:
+        return False
+    artefact = memo_dir / "working" / "quality_of_earnings_cash_conversion.md"
+    if not artefact.exists():
+        return True
+    content = artefact.read_text(encoding="utf-8", errors="replace")
+    return not bool(re.search(r"sustainable_cash_flow\s*:\s*\S", content, re.IGNORECASE))
+
+
+def check_incentive_map(body_text, memo_dir):
+    """L3 advisory: control-structure phrases without incentive_control_map.md."""
+    hits = [p for p in CONTROL_STRUCTURE_PHRASES if re.search(p, body_text, re.IGNORECASE)]
+    if not hits:
+        return False
+    artefact = memo_dir / "working" / "incentive_control_map.md"
+    return not artefact.exists()
+
+
+def check_capital_allocation(body_text, memo_dir):
+    """L4 advisory: capital allocation assumptions without capital_allocation_record.md."""
+    hits = [p for p in CAPITAL_ALLOCATION_PHRASES if re.search(p, body_text, re.IGNORECASE)]
+    if not hits:
+        return False
+    artefact = memo_dir / "working" / "capital_allocation_record.md"
+    return not artefact.exists()
+
+
+def check_monitoring_plan(body_text, memo_dir):
+    """L5: no monitoring section in memo body and no monitoring_plan.md artefact."""
+    if MONITORING_SECTION_PATTERN.search(body_text):
+        return False
+    artefact = memo_dir / "working" / "monitoring_plan.md"
+    if artefact.exists() and artefact.stat().st_size > 0:
+        return False
     return True
 
 
@@ -411,6 +517,73 @@ def lint(memo_path, decision_log_path=None):
         })
         if status == "CLEAN":
             status = "AUTO-REPAIRED"
+
+    # --- L1: exceptional-outcome language without reference class artefact ---
+    if check_exceptional_language(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_L1",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body contains exceptional-outcome language but "
+                "working/reference_class_base_rate.md is absent or has no why_may_differ field. "
+                "Remove or qualify the language, or complete the artefact (§8A.16)."
+            ),
+        })
+        status = "BLOCKED"
+
+    # --- L2: EBITDA/FCF multiples without quality-of-earnings artefact ---
+    if check_ebitda_quality(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_L2",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body uses adjusted EBITDA or FCF-based valuation but "
+                "working/quality_of_earnings_cash_conversion.md is absent or sustainable_cash_flow "
+                "is blank. Label valuation 'directional only — earnings quality not tested' (§8A.17)."
+            ),
+        })
+        status = "BLOCKED"
+
+    # --- L3: control-structure phrases without incentive map (advisory) ---
+    if check_incentive_map(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_L3",
+            "severity": "ADVISORY",
+            "detail": (
+                "Memo body references controlling shareholder, dual-class, preferred equity, sponsor "
+                "or similar structure but working/incentive_control_map.md is absent. "
+                "Cap governance/alignment language; complete the artefact (§8A.18)."
+            ),
+        })
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
+
+    # --- L4: capital allocation assumptions without record artefact (advisory) ---
+    if check_capital_allocation(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_L4",
+            "severity": "ADVISORY",
+            "detail": (
+                "Memo body assumes value-accretive capital allocation (deleverage, buyback, dividend "
+                "growth, M&A integration, reinvestment) but working/capital_allocation_record.md is "
+                "absent. Label those assumptions 'untested against historical record' (§8A.19)."
+            ),
+        })
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
+
+    # --- L5: no monitoring section or artefact ---
+    if check_monitoring_plan(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_L5",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body lacks a monitoring or re-underwriting section and "
+                "working/monitoring_plan.md is absent or empty. "
+                "Conclusion limited to point-in-time research; add monitoring section (§8A.20)."
+            ),
+        })
+        status = "BLOCKED"
 
     return status, findings
 

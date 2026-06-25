@@ -389,6 +389,11 @@ work). Screen runs the cheap controls and a 3-line C0; Standard and Full run the
 | 8A.11 decision-readiness status block | short form | required | required |
 | 8A.14 market-implied expectations + opposing thesis | not required | required for valuation-mandate runs | required |
 | 8A.15 full economic share-basis and liability bridge | not required | required | required |
+| 8A.16 reference-class and base-rate check | not required | required for valuation-mandate runs | required |
+| 8A.17 quality of earnings and cash conversion | not required | required | required |
+| 8A.18 incentive and control map | not required | required where material conflicts exist | required |
+| 8A.19 capital allocation record | not required | required | required |
+| 8A.20 re-underwriting and monitoring protocol | not required | required | required |
 
 State any 8A control you scope down (silent scope-cutting is itself an error).
 
@@ -675,6 +680,110 @@ Bridge rows:
 
 Gate rule: if any row in rows 2–9 is unknown and potentially material, the per-share figure carries the label `bridge-incomplete` and is not decision-ready. C2 must state: *"Per-share valuation is preliminary. Full economic bridge required before decision-ready."*
 
+### 8A.16 Reference-class and base-rate check
+
+Before accepting a thesis as plausible, identify the closest reference class and base-rate historical outcomes. If the memo claims the company will outperform the reference class, state the evidence supporting that deviation. If no reference class is available, record the claim as less testable and cap the conclusion accordingly.
+
+Reference classes include: deep-value commodity producers; post-acquisition deleveraging stories; distressed refinancings; pre-revenue technology companies; regulatory-approval cases; founder-led roll-ups; companies with controlling shareholders; cyclical margin recovery stories; businesses dependent on one customer, licence, product or geography.
+
+Required output: `working/reference_class_base_rate.md`
+
+```text
+Fields:
+  target_claim:            The claim being tested against a reference class
+  reference_class:         Closest comparable situation or company type
+  base_rate_outcome:       Typical historical outcome, range or failure mode
+  why_may_differ:          Evidence that justifies deviation from the base rate
+  why_may_not_differ:      Evidence that the base rate may still apply
+  impact_on_scenario_design: How the base rate affects bull, base and bear cases
+  impact_on_c9_wording:    Whether conclusion is capped, directional or decision-ready
+```
+
+Gate rule: C9 must not imply exceptional outcomes, durable outperformance, successful turnaround, re-rating, de-risking or sustained recovery unless this artefact exists and explains the deviation from the reference-class base rate. Standard cap wording: *"The memo has not adequately tested the target against a reference class or base-rate outcome. Claims of exceptional performance are therefore capped."*
+
+### 8A.17 Quality of earnings and cash conversion
+
+B1 must distinguish accounting earnings, adjusted earnings, operating cash flow and sustainable free cash flow. C2 may not capitalise adjusted EBITDA or guided FCF unless recurring quality, cash conversion, working-capital effects, one-offs and maintenance capital requirements have been tested.
+
+Common issues: working-capital pull-forward; capitalised costs; one-off tax benefits; aggressive adjusted-EBITDA add-backs; restructuring costs recurring every year; maintenance capex understated; customer prepayments masking weak economics; revenue recognised before cash collection; commodity, FX or tax timing effects; acquisition accounting distortions.
+
+Required output: `working/quality_of_earnings_cash_conversion.md`
+
+```text
+Fields:
+  reported_revenue:        Amount, source and basis
+  adjusted_earnings:       Adjustments and source
+  operating_cash_flow:     Amount and main drivers
+  free_cash_flow:          Definition and source
+  maintenance_capex:       Estimate or disclosed amount
+  working_capital_effect:  Source and direction
+  one_offs:                Positive and negative non-recurring items
+  tax_timing:              Cash versus accounting effect
+  sustainable_cash_flow:   Analyst estimate or evidence-supported range
+  c2_permission:           Whether valuation may capitalise EBITDA, FCF, revenue or NAV
+```
+
+Gate rule: C2 may not capitalise adjusted EBITDA or guided FCF unless this artefact exists with `sustainable_cash_flow` completed. Standard cap wording: *"Valuation is capped because earnings quality and sustainable cash conversion have not been sufficiently tested. Reported or adjusted metrics may be directionally useful, but they are not decision-ready valuation inputs."*
+
+### 8A.18 Incentive and control map
+
+The memo must map who controls the company, who has economic exposure, who can block, dilute or subordinate other stakeholders, and whether management incentives match the memo's assumed outcome. Where voting rights, economic rights and control differ, C2 and C9 must state the implication.
+
+Required when any of the following exist: controlling shareholder overhang; dual-class or non-voting shares; preferred equity with superior rights; creditor control through covenants; management earnouts; sponsor exit pressure; related-party transactions; minority shareholder leakage; change-of-control constraints; incentive targets based on adjusted rather than economic metrics.
+
+Required output: `working/incentive_control_map.md`
+
+```text
+Stakeholder table columns:
+  stakeholder | economic_interest | voting_control_rights | incentive | potential_conflict | evidence
+
+Minimum rows:
+  Management | Board/chair | Controlling shareholder | Minority shareholders |
+  Creditors | Preferred/non-voting holders | Customers/suppliers/regulators (where relevant)
+```
+
+Gate rule: C9 must not describe governance or alignment as favourable unless this artefact supports that conclusion where any of the triggering conditions above are present. Standard cap wording: *"Governance and alignment conclusions are capped because the incentive and control map is incomplete."*
+
+### 8A.19 Capital allocation record
+
+Future valuation may not assume value-accretive capital allocation unless the historical record or structural incentives support it. Capital allocation should be reviewed separately from operating performance.
+
+Required output: `working/capital_allocation_record.md`
+
+```text
+Fields (each with evidence quality and source):
+  m_and_a:               Deals completed, price paid, integration outcomes, impairments, implied returns
+  disposals:             Assets sold, valuation relative to book, use of proceeds
+  buybacks:              Timing, price paid vs fair value, value creation or destruction
+  dividends:             Sustainability, cyclicality, coverage
+  debt:                  Leverage targets, refinancing record, covenant discipline
+  capex:                 Growth vs maintenance split, return on invested capital, overruns
+  equity_issuance:       Price, dilution, use of proceeds
+  roic_returns:          Trend and peer comparison where available
+  management_promises:   Guidance vs outcome (inherits from B6)
+  c9_implication:        Whether future capital allocation assumptions are supported by the record
+```
+
+Gate rule: C2 and C9 must not assume value-accretive future capital allocation (deleveraging, buybacks, dividends, M&A integration, capex discipline, reinvestment) unless this artefact shows historical support or structural incentives justify the assumption. Standard cap wording: *"Future value creation from capital allocation is not decision-ready. The memo has not sufficiently tested whether management's historical record supports the assumed use of capital."*
+
+### 8A.20 Re-underwriting and monitoring protocol
+
+C9 must include a monitoring and re-underwriting section. A memo without a monitoring plan is a static research note, not a decision-support artefact for investment, credit or strategic-decision use.
+
+Required output: `working/monitoring_plan.md`
+
+```text
+Monitoring table columns:
+  variable | source | frequency | trigger_threshold | stage_to_rerun | action
+
+Minimum rows:
+  key_price_or_market_metric | operating_kpi | financing_or_liquidity_item |
+  legal_or_regulatory_item | ownership_or_control_item | management_guidance_item |
+  thesis_falsifier (link to working/falsification_triggers.md entries)
+```
+
+Gate rule: C9 must include a monitoring and re-underwriting section summarising the monitoring table. Without it, `decision_status` cannot be `decision-ready` except by explicit human override recorded in `final/decision_log.md`. Standard cap wording: *"The memo does not include a re-underwriting plan. The conclusion should be treated as point-in-time research only."*
+
 ---
 
 ## 18. Do-not-proceed conditions
@@ -705,7 +814,12 @@ HALT, or downgrade the final conclusion, if:
 - `working/market_implied_expectations.md` is absent but the memo body contains mispricing language ("mispriced", "undervalued", "overvalued", "cheap", "irrational discount", "market is wrong") — remove or qualify the language, or complete the artefact;
 - `working/opposing_thesis.md` is absent for a Standard or Full tier run and no opposing-thesis section appears in the memo body;
 - the memo body does not contain an "Evidence that would change the conclusion" section with at least one specific falsification trigger;
-- C2 headlines a per-share figure but the full economic liability bridge (§8A.15) is incomplete or the share denominator is not inherited from B2.
+- C2 headlines a per-share figure but the full economic liability bridge (§8A.15) is incomplete or the share denominator is not inherited from B2;
+- C9 implies exceptional outcomes, turnaround, re-rating, de-risking or sustained recovery but `working/reference_class_base_rate.md` is absent;
+- C2 capitalises adjusted EBITDA or guided FCF but `working/quality_of_earnings_cash_conversion.md` is absent or `sustainable_cash_flow` is blank;
+- C9 describes governance or alignment as favourable but `working/incentive_control_map.md` is absent where a triggering condition (§8A.18) exists;
+- C2 or C9 assumes value-accretive capital allocation but `working/capital_allocation_record.md` is absent;
+- C9 carries no monitoring section and no `working/monitoring_plan.md` exists — conclusion is limited to point-in-time research until the plan is completed.
 
 > *Validated in practice:* a B2 reference run was halted at the VERIFY step when NotebookLM
 > authentication expired. The gate behaved correctly — it refused to pass cap-table figures that could
@@ -741,9 +855,14 @@ Required (hard blockers if absent):
   working/disconfirming_evidence.md — §10B table
 
 Conditionally required (hard blockers when condition applies):
-  working/market_implied_expectations.md — required if memo body contains mispricing language; optional otherwise
-  working/opposing_thesis.md             — required for Standard and Full tier; may state "not documented" for Screen
-  working/falsification_triggers.md      — required; at minimum one thesis-level falsifier entry
+  working/market_implied_expectations.md          — required if memo body contains mispricing language; optional otherwise
+  working/opposing_thesis.md                       — required for Standard and Full tier; may state "not documented" for Screen
+  working/falsification_triggers.md                — required; at minimum one thesis-level falsifier entry
+  working/reference_class_base_rate.md             — required for Standard and Full tier valuation-mandate runs
+  working/quality_of_earnings_cash_conversion.md  — required for Standard and Full tier; must include sustainable_cash_flow
+  working/incentive_control_map.md                 — required when triggering conditions exist (§8A.18)
+  working/capital_allocation_record.md             — required for Standard and Full tier
+  working/monitoring_plan.md                       — required; absence caps conclusion to point-in-time research
 
 Source evidence (either satisfies the requirement):
   sources/source_register.csv       — populated with at least one entry, OR
@@ -767,6 +886,9 @@ company-research-[name]/
   working/evidence_gaps.md  working/disconfirming_evidence.md  working/checks/
   working/market_implied_expectations.md  working/opposing_thesis.md
   working/falsification_triggers.md  working/capital_structure.md
+  working/reference_class_base_rate.md  working/quality_of_earnings_cash_conversion.md
+  working/incentive_control_map.md  working/capital_allocation_record.md
+  working/monitoring_plan.md
   working/c9_linter_report.md  working/c9_repair_log.md
   final/memo.{md,docx,pdf}  final/mandate_coverage.md  final/decision_log.md
   final/post_run_lessons.md  final/proposed_process_patch.md

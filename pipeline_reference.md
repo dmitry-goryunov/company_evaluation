@@ -276,8 +276,16 @@ only when A1 marks it high-stakes.
   cash, debt, leases, equity, going-concern, runway — each with evidence pack + primary-source
   reference. Also record currency, units, accounting standard, restatements, discontinued ops, one-offs,
   capitalised development, restricted cash, post-period financings. **Check:** full cash roll-forward
-  (§13).
-- **B2. Capital structure & dilution — HARDENED NUMERIC GATE** (§12). *Human checkpoint #2.*
+  (§13). **Quality of earnings and cash conversion (§8A.17):** as part of B1, distinguish reported
+  revenue, adjusted earnings, operating cash flow and sustainable free cash flow; record working-capital
+  effects, one-offs, capitalised costs, maintenance capex, tax timing effects and any aggressive
+  adjusted-EBITDA add-backs in `working/quality_of_earnings_cash_conversion.md`. **Capital allocation
+  record (§8A.19):** begin `working/capital_allocation_record.md` at B1, recording M&A, buybacks,
+  dividends, capex discipline, equity issuance and ROIC trend. Inherits management-promises data from B6.
+- **B2. Capital structure & dilution — HARDENED NUMERIC GATE** (§12). **Incentive and control map
+  (§8A.18):** as part of B2, populate `working/incentive_control_map.md` where any triggering condition
+  exists (controlling shareholder, dual-class structure, preferred equity, creditor covenants, management
+  earnouts, sponsor exit, related-party transactions, change-of-control constraints). *Human checkpoint #2.*
 - **B3. Business model + commercial-traction hierarchy.** Distinguish current vs intended vs proven vs
   management-projected revenue model. Keep the 12-level commercial hierarchy mandatory.
 - **B4. Product / service evidence map.** Every claim: wording, source, evidence type, status, missing
@@ -292,6 +300,11 @@ only when A1 marks it high-stakes.
   strong/mixed/weak/insufficient) by financial/commercial/product-technical/operational/financing.
   **Governance (folded):** board independence, insider ownership, related-party transactions,
   shareholder concentration, incentives, auditor issues, controversies, litigation/regulatory.
+  **Capital allocation record (§8A.19):** complete `working/capital_allocation_record.md` at B6
+  using management milestone outcomes; the `management_promises` field inherits directly from B6's
+  milestone timeline and guidance-reliability output. **Incentive and control map (§8A.18):**
+  confirm and extend `working/incentive_control_map.md` at B6 using remuneration disclosures,
+  incentive structure, related-party conflicts, and governance weaknesses found here.
 
 ### Phase C — Judgement (discrete gates)
 
@@ -328,7 +341,11 @@ are in label order for reference lookup.
   market size claim → relevant segment → geography → customer type → company evidence of access →
   current evidence gap. C1 may not allow a large TAM/SAM/SOM to support valuation unless the
   company's access to that market is evidenced by contracts, pilots, customer relationships, or other
-  primary-source evidence.
+  primary-source evidence. **Reference-class and base-rate check (§8A.16):** at C1, identify the
+  closest reference class for the target's market position and competitive situation; populate
+  `working/reference_class_base_rate.md` with the `reference_class`, `base_rate_outcome`,
+  `impact_on_scenario_design` and `impact_on_c9_wording` fields. The reference class must inform C6
+  scenario design and C9 wording before those stages run.
 - **C2. Valuation.** **Run only after C3 (capital required) and C6 (scenarios) have passed.** If run
   before C3 and C6, the output must be explicitly labelled preliminary and not decision-ready.
   Required inherited inputs: B1 verified financial spine; B2 allowed share-count basis; C1
@@ -394,6 +411,8 @@ are in label order for reference lookup.
   | 12 | Per-share output (row 10 ÷ row 11, in stated currency and unit) | Always |
 
   **Gate:** if any row in rows 2–9 is unknown and potentially material, the per-share figure carries label `bridge-incomplete` and is not decision-ready. Wording: *"Per-share valuation is preliminary. Full economic bridge (liability reconciliation + share denominator from B2) is required before decision-ready."* Required C2 wording for scenario-dependent businesses: *"Valuation is scenario-first. The base case is the most evidence-supported case, not the midpoint between bull and bear."*
+
+  **Quality of earnings gate (§8A.17):** C2 may not capitalise adjusted EBITDA, guided FCF or revenue multiples unless `working/quality_of_earnings_cash_conversion.md` exists with `sustainable_cash_flow` field completed. If earnings quality is untested, C2 must label the valuation *"directional only — earnings quality not tested"* and cap to scenario-only output. **Capital allocation gate (§8A.19):** C2 must not assume value-accretive reinvestment, deleveraging or dividend sustainability unless `working/capital_allocation_record.md` is complete. If the record shows mixed or poor capital allocation, C2 must show a scenario that discounts future allocation quality.
 
   *Human checkpoint #4.*
 - **C3. Capital required** (bridge/base/scale/downside). **Run before C2.** Required outputs:
@@ -503,7 +522,10 @@ are in label order for reference lookup.
 
   For each question: why it matters; answer that raises conviction; answer that lowers it; who
   answers; what document/third party verifies it; class. **Rule:** any must-answer question unresolved
-  at C8 forces either return to source acquisition/A1 or C9 decision-not-ready.
+  at C8 forces either return to source acquisition/A1 or C9 decision-not-ready. **Monitoring links
+  (§8A.20):** at C8, tag each unanswered or monitoring-only question with its monitoring-plan row
+  (`variable`, `frequency`, `trigger_threshold`, `stage_to_rerun`) in `working/monitoring_plan.md`.
+  Thesis falsifiers from `working/falsification_triggers.md` must also appear in the monitoring plan.
 - **C9. Final memo write-up** — see §10. **Claim-surface diff (mandatory before emitting):** every
   load-bearing claim in C9 must map to a Facts Ledger claim ID. If any load-bearing claim has no
   Ledger ID, C9 must stop and return to the relevant earlier stage — this is a BLOCKED linter status.
@@ -529,9 +551,9 @@ risk register; bull/bear/base; management questions.
 executive conclusion; business model; product & differentiation; market; commercial traction;
 operational readiness; financials; financing & capital structure; capital required; valuation
 framework; M&A & strategic options; listing venue & comparables; management credibility & governance;
-bull/bear/base; risk register; management questions; **decision-depth checks (§8A.14–§8A.15)**;
+bull/bear/base; risk register; management questions; **decision-depth checks (§8A.14–§8A.20)**;
 evidence that would change the conclusion (must list specific falsification triggers from
-`working/falsification_triggers.md`); source limitations; appendices.
+`working/falsification_triggers.md`); monitoring and re-underwriting plan; source limitations; appendices.
 
 **Decision-depth checks block (required for Standard and Full tier — add before source limitations):**
 
@@ -571,6 +593,42 @@ Valuation decision maturity: decision-ready / directional only / not usable
 Liability bridge: complete (all 12 rows stated) / bridge-incomplete (rows [n] unknown) / not applicable
 Share denominator source: B2-verified [basis] / estimated — bridge incomplete
 Per-share valuation status: decision-ready / bridge-incomplete / not decision-ready
+
+### 6. Reference class and base rate
+Status: complete / incomplete / not applicable
+Reference class: [closest comparable company type or situation]
+Base-rate outcome: [typical historical outcome for this reference class]
+Why this target may differ: [evidence supporting deviation — be specific]
+Why this target may not differ: [evidence that the base rate may still apply]
+Conclusion cap: unrestricted / capped — [reason if capped]
+
+### 7. Quality of earnings and cash conversion
+Reported metric used in valuation: [EBITDA / adjusted EBITDA / FCF / revenue multiple / NAV]
+Sustainable cash flow estimate: [amount and basis] / not tested
+Working-capital effect: [positive / negative / neutral / not assessed]
+Main one-offs and add-backs: [list or "none identified"]
+Maintenance capex estimate: [amount or "not separately disclosed"]
+Earnings quality status: decision-ready / directional only — earnings quality not tested
+
+### 8. Incentives and control
+Status: complete / incomplete / not applicable (no triggering conditions)
+Controlling shareholder / dual-class / preferred / sponsor: [yes with details / no / unknown]
+Key conflict or misalignment identified: [description or "none identified"]
+C9 governance/alignment wording cap: unrestricted / capped — [reason if capped]
+
+### 9. Capital allocation record
+Status: complete / incomplete
+Historical record summary: [M&A / buybacks / dividends / leverage / capex — brief judgment]
+Assumed future capital allocation: [deleverage / buyback / dividend / reinvestment / none assumed]
+Record supports assumption: yes / mixed / no / not tested
+C9 capital allocation wording cap: unrestricted / capped — [reason if capped]
+
+### 10. Monitoring and re-underwriting plan
+Monitoring plan: complete / incomplete / not applicable
+Key variables monitored: [list from working/monitoring_plan.md — top 3–5]
+Thesis falsifiers linked: [yes / no]
+Memo expiry condition: [the event or date that would trigger a full re-underwriting]
+Decision-ready status without monitoring plan: no — point-in-time research only
 ```
 
 **Assembly rules:**
@@ -896,6 +954,68 @@ K5 — Full economic share-basis and liability bridge:
 
 Severity guide for K-checks: K1, K3, K4 (midpoint) produce BLOCKED; K2, K4 (no scenario link), K5 produce ADVISORY (downgrade conclusion language; do not independently block if all other checks pass).
 
+#### L. Five second-layer depth controls
+
+```text
+L1 — Reference-class and base-rate check:
+  IF memo body contains exceptional-outcome language:
+    [exceptional / durable outperformance / successful turnaround / re-rating /
+     rerating / de-risking / sustained recovery / recovery thesis / recovery play /
+     proven turnaround / structural re-rating]
+  AND working/reference_class_base_rate.md does not exist
+    OR why_may_differ field is blank or absent
+  THEN: BLOCKED — remove or qualify exceptional-outcome language; complete the artefact
+    with the reference class and deviation evidence.
+  Standard cap wording: "The memo has not adequately tested the target against a
+    reference class or base-rate outcome. Claims of exceptional performance are
+    therefore capped."
+
+L2 — Quality of earnings and cash conversion:
+  IF memo body or valuation table uses EBITDA, adjusted EBITDA, FCF, or
+    guided-free-cash-flow valuation language:
+    [EV/EBITDA / EV/EBITDAX / EBITDA multiple / FCF yield / free cash flow yield /
+     capitalised earnings / guided FCF / adjusted FCF]
+  AND working/quality_of_earnings_cash_conversion.md does not exist
+    OR sustainable_cash_flow field is blank or absent
+  THEN: BLOCKED — label valuation "directional only — earnings quality not tested";
+    complete the artefact before using adjusted earnings or FCF as a valuation input.
+  Standard cap wording: "Valuation is capped because earnings quality and sustainable
+    cash conversion have not been sufficiently tested. Reported or adjusted metrics
+    may be directionally useful, but they are not decision-ready valuation inputs."
+
+L3 — Incentive and control check:
+  IF memo body contains triggering conditions:
+    [controlling shareholder / dual-class / non-voting shares / preferred equity /
+     sponsor / earn-out / earnout / related-party / management earnout / covenant control]
+  AND working/incentive_control_map.md does not exist
+  THEN: ADVISORY — cap any governance or alignment positive wording to "not yet mapped";
+    complete the artefact.
+  Standard cap wording: "Governance and alignment conclusions are capped because the
+    incentive and control map is incomplete."
+
+L4 — Capital allocation check:
+  IF memo body or C2 assumes future capital allocation value:
+    [deleverage / deleveraging / buyback / share buyback / dividend growth /
+     M&A integration / capex discipline / reinvestment / value-accretive acquisition]
+  AND working/capital_allocation_record.md does not exist
+  THEN: ADVISORY — label those assumptions "untested against historical record";
+    complete the artefact.
+  Standard cap wording: "Future value creation from capital allocation is not
+    decision-ready. The memo has not sufficiently tested whether management's
+    historical record supports the assumed use of capital."
+
+L5 — Monitoring and re-underwriting plan check:
+  IF memo body does not contain a "Monitoring" or "re-underwriting" section
+    OR that section contains no variable rows
+  AND working/monitoring_plan.md does not exist or is empty
+  THEN: BLOCKED — decision_status cannot be decision-ready; add monitoring section
+    or label memo as point-in-time research.
+  Standard cap wording: "The memo does not include a re-underwriting plan.
+    The conclusion should be treated as point-in-time research only."
+```
+
+Severity guide for L-checks: L1, L2, L5 produce BLOCKED; L3, L4 produce ADVISORY (cap language, do not independently block if all other checks pass).
+
 #### Summary: concrete required checks
 
 ```text
@@ -1149,6 +1269,11 @@ explicitly rather than note the issue and continue. The following loopbacks are 
 | C2 base-case valuation is arithmetic midpoint of bull and bear | BLOCKED (K4) — replace midpoint with most evidence-supported scenario; relabel midpoint as blended sensitivity |
 | C2 per-share figure present but liability bridge rows 2–9 not all stated | ADVISORY (K5) — label per-share "bridge-incomplete"; cap per-share to directional only |
 | Standard/Full tier run but working/opposing_thesis.md absent and no opposing-thesis section in memo | ADVISORY (K2) — cap conclusion to thesis-tracking; add opposing-thesis statement |
+| C9 implies exceptional outcomes but reference_class_base_rate.md absent or why_may_differ blank | BLOCKED (L1) — remove exceptional language or complete artefact with deviation evidence |
+| C2 capitalises adjusted EBITDA/FCF but quality_of_earnings_cash_conversion.md absent or sustainable_cash_flow blank | BLOCKED (L2) — label valuation directional only; complete earnings-quality artefact |
+| Controlling shareholder / dual-class / preferred / sponsor in memo but incentive_control_map.md absent | ADVISORY (L3) — cap governance language; complete incentive and control map |
+| C2/C9 assumes deleverage/buyback/M&A integration but capital_allocation_record.md absent | ADVISORY (L4) — label capital allocation assumptions untested; complete artefact |
+| C9 lacks monitoring section and monitoring_plan.md absent | BLOCKED (L5) — conclusion limited to point-in-time research; add monitoring section |
 
 ---
 
