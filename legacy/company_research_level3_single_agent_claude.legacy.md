@@ -1,3 +1,19 @@
+> **NON-CANONICAL LEGACY FILE — DO NOT EDIT**
+>
+> This file is retained for reference and backward compatibility only. It is not the source of truth.
+>
+> **Canonical pipeline files:**
+> - `pipeline_core.md` — always-load design principles and cross-cutting rules
+> - `pipeline_reference.md` — stage procedures and reference detail, read on demand
+>
+> **Generated single-file export:** `dist/company_research_level3_single_agent_claude.md`
+> (produced by `build_dist.py` from the canonical files above)
+>
+> All future changes must be made in `pipeline_core.md` and/or `pipeline_reference.md`.
+> Do not maintain this file in parallel with the canonical files.
+
+---
+
 # Level 3: Single-Agent, Code-Checked, Human-Gated Company Research Pipeline
 
 ---
