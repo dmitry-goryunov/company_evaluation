@@ -80,3 +80,79 @@
   four contradiction types simultaneously.
 - `tests/expected/harbour_memo_unresolved_c8.expected_status.txt` — Expected BLOCKED output
   with correct DECISION-NOT-READY replacement wording.
+
+---
+
+| 2026-06-25 | patch-2026-06-25b | Five generic depth controls | Research memos can pass the C9 linter without answering (1) what the market already prices in, (2) the strongest opposing thesis, (3) what would falsify the conclusion, (4) whether valuation is scenario-first, or (5) whether the per-share bridge is complete. These omissions allow a thesis-tracking memo to omit material uncertainty in a way that is policy-compliant but epistemically weak. | Harbour Energy plc (HBR) AUTO run, 2026-06-25, post-patch review | User (Five Generic Depth Controls memo, 2026-06-25) | pipeline_core.md, pipeline_reference.md, checks/c9_policy_linter.py | Revert by reverting pipeline_core.md and pipeline_reference.md to commit 6b410c9; remove K-check functions from c9_policy_linter.py. |
+
+## Patch detail (patch-2026-06-25b)
+
+### Changes to pipeline_core.md
+
+1. **§8A.0 proportionality table** — Added rows for 8A.14 (market-implied expectations +
+   opposing thesis) and 8A.15 (full economic share-basis and liability bridge).
+
+2. **§8A.14 Market-implied expectations and opposing thesis** (new section) — Two required
+   outputs for Standard and Full tier valuation-mandate runs:
+   - `working/market_implied_expectations.md` (7 fields) — required when memo uses mispricing
+     language; `alternative_rational_explanation` must be completed.
+   - `working/opposing_thesis.md` (6 fields) — required for Standard and Full tier; if
+     `resolution_status = unresolved`, conclusion caps to thesis-tracking or decision-not-ready.
+
+3. **§8A.15 Full economic share-basis and liability bridge** (new section) — 12-row bridge
+   from EV to per-share output must be completed before headlining a per-share figure; share
+   denominator must be inherited from B2. Unknown material rows cause `bridge-incomplete` label.
+
+4. **§18 Do-not-proceed** — Four new bullets:
+   - `market_implied_expectations.md` absent but mispricing language present
+   - `opposing_thesis.md` absent for Standard/Full run without opposing-thesis section
+   - No "Evidence that would change the conclusion" section with specific falsifiers
+   - C2 per-share figure without completed liability bridge
+
+5. **§21 C9 artefact-presence check list** — Added three conditionally required artefacts:
+   `working/market_implied_expectations.md`, `working/opposing_thesis.md`,
+   `working/falsification_triggers.md`.
+
+6. **§22 Directory structure** — Added `working/market_implied_expectations.md`,
+   `working/opposing_thesis.md`, `working/falsification_triggers.md`,
+   `working/capital_structure.md`.
+
+### Changes to pipeline_reference.md
+
+7. **A1 stage** — Added market-implied expectations output requirement: must output
+   `working/market_implied_expectations.md` at A1 close for valuation-mandate runs.
+
+8. **C0 stage** — Added opposing thesis requirement: as part of claim audit, document
+   `working/opposing_thesis.md`; unresolved opposing thesis caps C9.
+
+9. **C2 stage** — Added full economic liability bridge table (12 rows: EV → per-share
+   output); gate rule that per-share figure without complete bridge carries `bridge-incomplete`
+   label and is not decision-ready. Added required scenario-first wording for C2.
+
+10. **C6 stage** — Added falsification triggers section: `working/falsification_triggers.md`
+    required output (7-field schema); thesis-level falsifiers must appear in C9 "Evidence that
+    would change the conclusion" section verbatim.
+
+11. **C7 stage** — Extended hard propagation checklist: HIGH/Critical risks that would destroy
+    the central thesis must also appear in `working/falsification_triggers.md`.
+
+12. **§10 C9 memo structure** — Added "decision-depth checks (§8A.14–§8A.15)" section to memo
+    structure; added "Evidence that would change the conclusion" note (must list specific
+    falsification triggers); added Decision-depth checks template (5 subsections).
+
+13. **§10A.5 section K** — Five new linter checks (K1–K5):
+    - K1 BLOCKED: mispricing language without market_implied_expectations.md
+    - K2 ADVISORY: no opposing thesis artefact or section (caps conclusion)
+    - K3 BLOCKED: no "Evidence that would change the conclusion" section with specific falsifier
+    - K4 BLOCKED: base case is arithmetic midpoint of bull and bear
+    - K4 ADVISORY: per-share valuation without scenario_link reference
+    - K5 ADVISORY: per-share figure without completed liability bridge
+
+14. **§10D loopback** — Five new loopback rows for K1–K5 triggers.
+
+### Changes to checks/c9_policy_linter.py
+
+15. Added five new check functions (`check_mispricing_language`, `check_opposing_thesis`,
+    `check_falsification_section`, `check_scenario_midpoint`, `check_liability_bridge`) and
+    integrated into `lint()`. K1/K3/K4(midpoint) produce BLOCKED; K2/K5 produce ADVISORY
+    (AUTO-REPAIRED if otherwise CLEAN).

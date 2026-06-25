@@ -57,6 +57,36 @@ SOURCING_CLAIM_PHRASES = [
     r"claim.surface.diff.*all.*sourced",
 ]
 
+# K1 — phrases that require working/market_implied_expectations.md
+MISPRICING_PHRASES = [
+    r"\bmispriced\b",
+    r"\bundervalued\b",
+    r"\bovervalued\b",
+    r"\bcheap\b",
+    r"\bexpensive\b",
+    r"\birrational discount\b",
+    r"\bmarket is wrong\b",
+    r"\bmarket is pricing in\b",
+]
+
+# K3 — section header that must exist in memo body
+FALSIFICATION_SECTION_PATTERN = re.compile(
+    r"(?:evidence that would change the conclusion|falsification triggers)",
+    re.IGNORECASE,
+)
+
+# K4 — per-share valuation without scenario link
+PER_SHARE_PATTERN = re.compile(
+    r"\b(?:\d+[\.,]?\d*\s*(?:p|pence|¢|cents|c)\b|\$\s*\d+[\.,]?\d*\s*(?:per\s+share|\/share))",
+    re.IGNORECASE,
+)
+
+# K4 midpoint detection: "midpoint" near "bull" and "bear"
+MIDPOINT_PATTERN = re.compile(
+    r"\bmidpoint\b.*?\b(?:bull|bear)\b|\b(?:bull|bear)\b.*?\bmidpoint\b",
+    re.IGNORECASE | re.DOTALL,
+)
+
 
 def parse_yaml_block(text):
     """Extract c9_status_block YAML fields from memo text."""
@@ -131,6 +161,60 @@ def check_investment_action_phrases(body_text):
                 continue
             hits.append(m.group())
     return hits
+
+
+def check_mispricing_language(body_text, memo_dir):
+    """K1: mispricing phrases in body without market_implied_expectations.md."""
+    hits = [p for p in MISPRICING_PHRASES if re.search(p, body_text, re.IGNORECASE)]
+    if not hits:
+        return False
+    artefact = memo_dir / "working" / "market_implied_expectations.md"
+    if not artefact.exists():
+        return True
+    content = artefact.read_text(encoding="utf-8", errors="replace")
+    if re.search(r"alternative_rational_explanation\s*:\s*\S", content, re.IGNORECASE):
+        return False
+    return True
+
+
+def check_opposing_thesis(memo_dir, body_text):
+    """K2 advisory: Standard/Full run but no opposing thesis artefact or section."""
+    artefact = memo_dir / "working" / "opposing_thesis.md"
+    if artefact.exists():
+        return False
+    if re.search(r"opposing\s+thesis|strongest\s+.*\s+thesis", body_text, re.IGNORECASE):
+        return False
+    return True
+
+
+def check_falsification_section(body_text):
+    """K3: memo body must contain an 'Evidence that would change' section with content."""
+    m = FALSIFICATION_SECTION_PATTERN.search(body_text)
+    if not m:
+        return True
+    # Section exists; check it has at least one numbered trigger or bullet
+    after = body_text[m.end():m.end() + 600]
+    return not bool(re.search(r"(?:^|\n)\s*(?:\d+\.|[-*])\s+\S", after))
+
+
+def check_scenario_midpoint(body_text):
+    """K4 BLOCKED: base-case valuation described as midpoint of bull and bear."""
+    return bool(MIDPOINT_PATTERN.search(body_text))
+
+
+def check_liability_bridge(body_text, memo_dir):
+    """K5 advisory: per-share figure in memo without completed bridge or bridge-incomplete label."""
+    if not PER_SHARE_PATTERN.search(body_text):
+        return False
+    if re.search(r"bridge.incomplete", body_text, re.IGNORECASE):
+        return False
+    # Check if bridge table exists in working/capital_structure.md
+    bridge_file = memo_dir / "working" / "capital_structure.md"
+    if bridge_file.exists():
+        content = bridge_file.read_text(encoding="utf-8", errors="replace")
+        if re.search(r"share\s+denominator|per.share\s+output", content, re.IGNORECASE):
+            return False
+    return True
 
 
 def check_sourcing_claim(text, memo_dir):
@@ -260,6 +344,73 @@ def lint(memo_path, decision_log_path=None):
             ),
         })
         status = "BLOCKED"
+
+    # --- K1: mispricing language without market_implied_expectations.md ---
+    if check_mispricing_language(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_K1",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body contains mispricing language but working/market_implied_expectations.md "
+                "is absent or has no alternative_rational_explanation. Remove or qualify the language, "
+                "or complete the artefact."
+            ),
+        })
+        status = "BLOCKED"
+
+    # --- K2: no opposing thesis (advisory — caps conclusion but does not independently block) ---
+    if check_opposing_thesis(memo_dir, body):
+        findings.append({
+            "type": "DEPTH_CONTROL_K2",
+            "severity": "ADVISORY",
+            "detail": (
+                "working/opposing_thesis.md is absent and no opposing-thesis section found in memo body. "
+                "Conclusion capped to thesis-tracking or decision-not-ready unless human review accepts "
+                "the residual risk."
+            ),
+        })
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
+
+    # --- K3: no falsification section ---
+    if check_falsification_section(body):
+        findings.append({
+            "type": "DEPTH_CONTROL_K3",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body does not contain an 'Evidence that would change the conclusion' section "
+                "with at least one specific falsification trigger. Add the section and populate from "
+                "working/falsification_triggers.md."
+            ),
+        })
+        status = "BLOCKED"
+
+    # --- K4: base-case described as midpoint of bull and bear ---
+    if check_scenario_midpoint(body):
+        findings.append({
+            "type": "DEPTH_CONTROL_K4",
+            "severity": "BLOCKED",
+            "detail": (
+                "Memo body describes the base-case valuation as the midpoint of bull and bear. "
+                "The base case must be the most evidence-supported case independently; replace "
+                "the midpoint reference or relabel it as a blended sensitivity."
+            ),
+        })
+        status = "BLOCKED"
+
+    # --- K5: per-share valuation without bridge (advisory) ---
+    if check_liability_bridge(body, memo_dir):
+        findings.append({
+            "type": "DEPTH_CONTROL_K5",
+            "severity": "ADVISORY",
+            "detail": (
+                "Memo body contains a per-share figure but no completed liability bridge found in "
+                "working/capital_structure.md and memo does not carry 'bridge-incomplete' label. "
+                "Label the per-share figure bridge-incomplete or complete the bridge table (§8A.15)."
+            ),
+        })
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
 
     return status, findings
 

@@ -5,7 +5,7 @@
 > - `pipeline_reference.md` (canonical — reference, read by section on demand)
 >
 > To update this file, edit the canonical sources and re-run `python build_dist.py`.
-> Generated: 2026-06-25 18:09 UTC
+> Generated: 2026-06-25 19:14 UTC
 
 ---
 
@@ -398,6 +398,8 @@ work). Screen runs the cheap controls and a 3-line C0; Standard and Full run the
 | 8A.9 C0 claim audit | 3-line form (top-3 claims, valuation level, recommendation cap) | full `claim_audit.md` | full `claim_audit.md` |
 | 8A.10 recommendation guardrail | required | required | required |
 | 8A.11 decision-readiness status block | short form | required | required |
+| 8A.14 market-implied expectations + opposing thesis | not required | required for valuation-mandate runs | required |
+| 8A.15 full economic share-basis and liability bridge | not required | required | required |
 
 State any 8A control you scope down (silent scope-cutting is itself an error).
 
@@ -623,6 +625,67 @@ derivation rule above is violated. An unfilled field is treated as a hard blocke
 | Investment decision approved? | no unless explicit human approval is recorded |
 ```
 
+### 8A.14 Market-implied expectations and opposing thesis
+
+These two controls are added to every Standard and Full tier valuation-mandate run (public equity, credit, M&A buyer/target). Screen tier omits them.
+
+**Market-implied expectations.** Before claiming that a security is mispriced, undervalued, overvalued, cheap, expensive, or that the market is wrong, the researcher must document what the current price or valuation multiple implies about future performance, and give the strongest rational explanation for why the market might be pricing it that way. Without this, "cheap" is an observation, not a conclusion.
+
+Required output: `working/market_implied_expectations.md`
+
+```text
+Fields:
+  current_market_signal:           current share price, yield, or implied multiple
+  implied_expectation:             what the current price already prices in
+  alternative_rational_explanation: strongest non-mispricing reason for the current price
+  evidence_supporting_mispricing:  sources and logic if mispricing is claimed
+  evidence_against_mispricing:     sources and logic working against the mispricing claim
+  time_horizon:                    period over which the embedded expectation would be tested
+  valuation_link:                  C2 method or C6 scenario this artefact informs
+```
+
+Gate rule: the memo body must not use mispricing language (`mispriced / undervalued / overvalued / cheap / expensive / irrational discount / market is wrong`) unless this artefact exists with `alternative_rational_explanation` completed. Standard cap wording: *"The current valuation may be attractive, but the memo has not fully established what expectations are already embedded in the price. Mispricing language is therefore capped."*
+
+**Opposing thesis.** As part of the C0 claim audit, document the strongest plausible thesis that leads a reasonable analyst to the opposite conclusion from the one being advanced.
+
+Required output: `working/opposing_thesis.md`
+
+```text
+Fields:
+  opposing_claim:             the thesis a reasonable bear (or bull) would make
+  evidence_for_opposing:      sources supporting the opposing thesis
+  evidence_against_opposing:  sources that undercut the opposing thesis
+  thesis_link:                which central claim is being challenged
+  falsifier:                  what single fact or event would resolve the debate
+  resolution_status:          refuted / unresolved / human-accepted residual
+```
+
+Gate rule: C9 must either include an opposing-thesis subsection in the Decision-depth checks block, or explicitly state that the opposing thesis could not be tested, with the conclusion capped accordingly. If `resolution_status = unresolved`, conclusion is capped to thesis-tracking or decision-not-ready unless human review explicitly accepts the residual risk.
+
+### 8A.15 Full economic share-basis and liability bridge
+
+C2 must not headline a per-share figure unless the full economic bridge from enterprise value to per-share equity value is complete and the share denominator is inherited from B2.
+
+Required working artefact: the liability bridge table in `working/capital_structure.md` (or as a standalone C2 bridge table). The bridge must include all twelve rows, even if some are zero.
+
+```text
+Bridge rows:
+   1  Enterprise value (EV)
+   2  Net debt (as reported)
+   3  Leases (IFRS 16 or equivalent)
+   4  Hybrids (preference shares, convertibles — debt or equity treatment stated)
+   5  Decommissioning / closure provisions (stated or discounted present value)
+   6  Pension deficits (net of deferred tax if applicable)
+   7  Deferred / crystallised tax liabilities
+   8  Minority interests / NCI (at carrying value or fair value — basis stated)
+   9  Off-balance-sheet obligations (guarantees, contingents — if material)
+  10  Equity value (row 1 minus rows 2–9)
+  11  Share denominator (inherited from B2: basic / FD_low / FD_base / FD_high)
+  12  Per-share output (row 10 ÷ row 11, in stated currency and unit)
+```
+
+Gate rule: if any row in rows 2–9 is unknown and potentially material, the per-share figure carries the label `bridge-incomplete` and is not decision-ready. C2 must state: *"Per-share valuation is preliminary. Full economic bridge required before decision-ready."*
+
 ---
 
 ## 18. Do-not-proceed conditions
@@ -649,7 +712,11 @@ HALT, or downgrade the final conclusion, if:
 - `unresolved_must_answer_count > 0` and `final/decision_log.md` does not record an explicit human
   override with `open_items_reviewed` listed;
 - any required artefact in the C9 artefact-presence check list (§21) is absent or empty;
-- the c9_status_block YAML is absent, incomplete, or its derivation rules are violated.
+- the c9_status_block YAML is absent, incomplete, or its derivation rules are violated;
+- `working/market_implied_expectations.md` is absent but the memo body contains mispricing language ("mispriced", "undervalued", "overvalued", "cheap", "irrational discount", "market is wrong") — remove or qualify the language, or complete the artefact;
+- `working/opposing_thesis.md` is absent for a Standard or Full tier run and no opposing-thesis section appears in the memo body;
+- the memo body does not contain an "Evidence that would change the conclusion" section with at least one specific falsification trigger;
+- C2 headlines a per-share figure but the full economic liability bridge (§8A.15) is incomplete or the share denominator is not inherited from B2.
 
 > *Validated in practice:* a B2 reference run was halted at the VERIFY step when NotebookLM
 > authentication expired. The gate behaved correctly — it refused to pass cap-table figures that could
@@ -684,6 +751,11 @@ Required (hard blockers if absent):
   working/[claim_audit].md          — C0 claim audit output (filename per company convention)
   working/disconfirming_evidence.md — §10B table
 
+Conditionally required (hard blockers when condition applies):
+  working/market_implied_expectations.md — required if memo body contains mispricing language; optional otherwise
+  working/opposing_thesis.md             — required for Standard and Full tier; may state "not documented" for Screen
+  working/falsification_triggers.md      — required; at minimum one thesis-level falsifier entry
+
 Source evidence (either satisfies the requirement):
   sources/source_register.csv       — populated with at least one entry, OR
   notebooklm_outputs/raw/           — non-empty directory with at least one stage output file
@@ -704,6 +776,8 @@ company-research-[name]/
   notebooklm_outputs/raw/  notebooklm_outputs/revised/
   working/facts_ledger.md  working/assumptions_log.md  working/open_questions.md
   working/evidence_gaps.md  working/disconfirming_evidence.md  working/checks/
+  working/market_implied_expectations.md  working/opposing_thesis.md
+  working/falsification_triggers.md  working/capital_structure.md
   working/c9_linter_report.md  working/c9_repair_log.md
   final/memo.{md,docx,pdf}  final/mandate_coverage.md  final/decision_log.md
   final/post_run_lessons.md  final/proposed_process_patch.md
@@ -1050,7 +1124,7 @@ only when A1 marks it high-stakes.
   type. **Dependency rule:** a high-stakes question (financials, cap table, valuation) that is not
   answerable -> **HALT and demand sources.** Apply the sector source overlay. **Flag governance**
   routine vs high-stakes. **Run the disconfirming-evidence search (§10B); output
-  `working/disconfirming_evidence.md` before A1 PASS.** *Human checkpoint #1.*
+  `working/disconfirming_evidence.md` before A1 PASS.** **Market-implied expectations (§8A.14):** for valuation-mandate runs (public equity, credit, M&A), output `working/market_implied_expectations.md` at A1 close, capturing `current_market_signal`, `implied_expectation`, and `alternative_rational_explanation`. Mispricing language in C9 is prohibited without this artefact. *Human checkpoint #1.*
 
 ### Phase B — Evidence Spine (numbers first)
 - **B1. Financial spine.** Revenue, margins, opex, EBITDA/operating loss, net loss, cash flow, capex,
@@ -1101,6 +1175,8 @@ are in label order for reference lookup.
   | Not usable for decision | Cap C2/C9 language; record in decision-readiness status block |
   | Gross/attributable basis unclear | Return to B1/B2/B6 before valuation |
   | Maturity cap below decision-ready | C2 and C9 must use capped wording |
+
+  **Opposing thesis (§8A.14):** as part of C0 claim audit, document the strongest plausible thesis leading to the opposite conclusion. Output `working/opposing_thesis.md` (6 fields: `opposing_claim`, `evidence_for_opposing`, `evidence_against_opposing`, `thesis_link`, `falsifier`, `resolution_status`). If `resolution_status = unresolved`, C9 must cap to thesis-tracking or decision-not-ready. Standard cap wording: *"A reasonable opposing thesis remains unresolved. The conclusion is therefore capped to thesis-tracking or decision-not-ready unless human review explicitly accepts the residual risk."*
 - **C1. Market & competition** (+ dated overlay). Each market-size claim: source, methodology,
   geography, segment definition, TAM/SAM/SOM, does the company serve the defined market, double-
   counting risk. **Required addressability bridge for every market-size claim used in valuation:**
@@ -1154,6 +1230,25 @@ are in label order for reference lookup.
   **Rules:** headline price targets must use the same share basis as the C0/C2 permission table, or
   show voting and fully diluted values side by side. If B2 marks the fully diluted basis as material,
   C2 and C9 must not headline voting-share valuation alone.
+
+  **Full economic liability bridge (§8A.15) — mandatory before headlining any per-share figure.** Complete all twelve rows before the C2 output is decision-ready. Rows 2–9 may state zero if genuinely nil, but must be explicitly stated.
+
+  | Row | Item | Required if |
+  |---|---|---|
+  | 1 | Enterprise value (EV) | Always |
+  | 2 | Net debt (as reported) | Always |
+  | 3 | Leases (IFRS 16 or equivalent) | If material |
+  | 4 | Hybrids (preference shares, convertibles — debt or equity treatment stated) | If material |
+  | 5 | Decommissioning / closure provisions (undiscounted or discounted — basis stated) | If material |
+  | 6 | Pension deficits (net of deferred tax if applicable) | If material |
+  | 7 | Deferred / crystallised tax liabilities | If material |
+  | 8 | Minority interests / NCI (carrying value or fair value — basis stated) | If below 100% ownership |
+  | 9 | Off-balance-sheet obligations (guarantees, contingents) | If material |
+  | 10 | Equity value (row 1 minus rows 2–9) | Always |
+  | 11 | Share denominator (inherited from B2: basic / FD_low / FD_base / FD_high) | Always |
+  | 12 | Per-share output (row 10 ÷ row 11, in stated currency and unit) | Always |
+
+  **Gate:** if any row in rows 2–9 is unknown and potentially material, the per-share figure carries label `bridge-incomplete` and is not decision-ready. Wording: *"Per-share valuation is preliminary. Full economic bridge (liability reconciliation + share denominator from B2) is required before decision-ready."* Required C2 wording for scenario-dependent businesses: *"Valuation is scenario-first. The base case is the most evidence-supported case, not the midpoint between bull and bear."*
 
   *Human checkpoint #4.*
 - **C3. Capital required** (bridge/base/scale/downside). **Run before C2.** Required outputs:
@@ -1214,6 +1309,20 @@ are in label order for reference lookup.
 
   **Rules:** the base case must be the most evidence-supported case, not a midpoint between bull and
   bear. If a scenario lacks capital or dilution assumptions, it cannot support C2 valuation.
+
+  **Falsification triggers — required output `working/falsification_triggers.md`.** Every scenario must have a `falsifier` in the schema above. Additionally, record at least three thesis-level falsifiers — specific facts or events that would cause the central thesis to be abandoned regardless of scenario.
+
+  | Field | Description |
+  |---|---|
+  | `thesis_claim` | The central thesis claim being falsified |
+  | `falsifier` | The single fact or event that would eliminate the thesis |
+  | `threshold` | The specific value or condition that constitutes the trigger |
+  | `timing` | When the trigger could crystallise |
+  | `source_to_monitor` | Where evidence of the trigger would first appear |
+  | `action_if_triggered` | What the portfolio or research action should be |
+  | `linked_stages` | Which C6 scenario and C7 risk IDs this falsifier relates to |
+
+  Thesis-level falsifiers must appear verbatim in the C9 *"Evidence that would change the conclusion"* section. Standard C9 wording: *"The conclusion should be revisited if any of the following falsification triggers occur: [list]. These are not merely risks; they are conditions under which the central thesis would no longer be supported."*
 - **C7. Risk register** — discrete. Rank by severity, probability, detectability, time horizon,
   mitigants, monitoring signal. Includes governance risks from B6. **Mechanical cap:** any unresolved
   High or Critical risk affecting valuation, ownership, legal status, financing, product readiness,
@@ -1231,6 +1340,9 @@ are in label order for reference lookup.
   □ Risk appears in C2 valuation caveat or drives scenario assumption
   □ Risk generates a C8 question if answerable by management
   □ Risk is reflected in unresolved_high_risk_count in c9_status_block YAML
+  □ If risk materialisation would destroy the central thesis → also recorded as a thesis-level
+    falsifier in working/falsification_triggers.md and listed in C9 "Evidence that would change
+    the conclusion"
   ```
 
   A Critical risk may be disclosed and accepted only if human review is recorded in
@@ -1272,8 +1384,49 @@ risk register; bull/bear/base; management questions.
 executive conclusion; business model; product & differentiation; market; commercial traction;
 operational readiness; financials; financing & capital structure; capital required; valuation
 framework; M&A & strategic options; listing venue & comparables; management credibility & governance;
-bull/bear/base; risk register; management questions; evidence that would change the conclusion;
-source limitations; appendices.
+bull/bear/base; risk register; management questions; **decision-depth checks (§8A.14–§8A.15)**;
+evidence that would change the conclusion (must list specific falsification triggers from
+`working/falsification_triggers.md`); source limitations; appendices.
+
+**Decision-depth checks block (required for Standard and Full tier — add before source limitations):**
+
+```md
+## Decision-depth checks
+
+### 1. Market-implied expectations
+Status: complete / incomplete / not applicable
+Current market signal: [share price, yield, or implied multiple — with date and source]
+Implied expectation: [what the current price already prices in]
+Alternative rational explanation: [strongest non-mispricing reason for the current price]
+Evidence supporting mispricing (if claimed): [source references]
+Time horizon: [period over which the embedded expectation would be tested]
+Conclusion cap: unrestricted / capped — [reason if capped]
+
+### 2. Strongest opposing thesis
+Status: documented and refuted / documented and unresolved / human-accepted residual
+Core opposing claim: [the thesis a reasonable bear would make]
+Evidence supporting opposing thesis: [sources]
+Reason central thesis is preferred (if it is): [logic and sources]
+Conclusion cap: unrestricted / capped to thesis-tracking — [reason if capped]
+
+### 3. Evidence that would change the conclusion
+The conclusion should be revisited if any of the following occurs:
+1. [Falsifier 1: specific fact or event] → threshold: [value or condition] → source to monitor: [source]
+2. [Falsifier 2] → threshold: [value] → source to monitor: [source]
+3. [Falsifier 3] → threshold: [value] → source to monitor: [source]
+These are not merely risks; they are conditions under which the central thesis would no longer be supported.
+
+### 4. Scenario-first valuation status
+Scenario set: complete / incomplete / not applicable
+Base case driver: [the most evidence-supported assumption driving the base case]
+Base case is arithmetic midpoint of bull and bear: yes — BLOCKED / no — permitted
+Valuation decision maturity: decision-ready / directional only / not usable
+
+### 5. Full economic basis
+Liability bridge: complete (all 12 rows stated) / bridge-incomplete (rows [n] unknown) / not applicable
+Share denominator source: B2-verified [basis] / estimated — bridge incomplete
+Per-share valuation status: decision-ready / bridge-incomplete / not decision-ready
+```
 
 **Assembly rules:**
 - No new evidence at C9. Every load-bearing fact must trace to a Facts Ledger entry.
@@ -1541,6 +1694,63 @@ Contradiction type 4 — sourcing claim / artefact absence:
 **Negative test fixture:** `tests/fixtures/harbour_memo_unresolved_c8.md` demonstrates all four
 contradiction types and must produce c9_status = BLOCKED when run through `checks/c9_policy_linter.py`.
 
+#### K. Five generic depth controls
+
+```text
+K1 — Market-implied expectations:
+  IF memo body contains mispricing language:
+    [mispriced / undervalued / overvalued / cheap / expensive /
+     irrational discount / market is wrong / market is pricing in]
+  AND working/market_implied_expectations.md does not exist
+    OR alternative_rational_explanation field is blank or absent
+  THEN: BLOCKED — remove or qualify mispricing language; complete the artefact with the
+    strongest rational explanation for the current price.
+  Standard wording if incomplete: "The current valuation may be attractive, but the memo
+    has not fully established what expectations are already embedded in the price.
+    Mispricing language is therefore capped."
+
+K2 — Strongest opposing thesis:
+  IF tier is Standard or Full
+  AND working/opposing_thesis.md does not exist
+  AND memo body does not contain a "Strongest opposing thesis" or "opposing thesis" section
+  THEN: ADVISORY — cap conclusion to thesis-tracking or decision-not-ready; add note:
+    "A reasonable opposing thesis remains unresolved. The conclusion is therefore capped
+    to thesis-tracking or decision-not-ready unless human review explicitly accepts
+    the residual risk."
+  (ADVISORY: caps language, does not independently block the run.)
+
+K3 — Falsification triggers:
+  IF memo body does not contain a section titled "Evidence that would change the conclusion"
+    OR that section is absent or contains no specific named falsifier
+  THEN: BLOCKED — add the required section; populate from working/falsification_triggers.md.
+  Standard C9 wording required:
+    "The conclusion should be revisited if any of the following falsification triggers
+    occur: [list]. These are not merely risks; they are conditions under which the
+    central thesis would no longer be supported."
+
+K4 — Scenario-first valuation:
+  IF memo body contains a per-share valuation
+  AND base-case valuation is arithmetically the midpoint of bull and bear case values
+  THEN: BLOCKED — base case must be the most evidence-supported case, not a midpoint.
+    Remove or relabel the midpoint as a blended sensitivity; identify the evidence-based
+    base case independently.
+  IF memo body contains a per-share valuation without any scenario_link reference
+  THEN: ADVISORY — label valuation "directional only"; add note: "Valuation outputs are
+    directional only. Scenario assumptions are not sufficiently evidenced to support a
+    decision-ready valuation."
+
+K5 — Full economic share-basis and liability bridge:
+  IF memo body contains a per-share valuation figure
+  AND working/capital_structure.md does not contain a completed liability bridge
+    (identified by presence of "Share denominator" row and "Per-share output" row)
+  AND memo body does not carry label "bridge-incomplete" on the per-share figure
+  THEN: ADVISORY — label per-share figure "bridge-incomplete (§8A.15)"; add note:
+    "Per-share valuation is preliminary. Full economic bridge (liability reconciliation
+    and share denominator from B2) is required before decision-ready."
+```
+
+Severity guide for K-checks: K1, K3, K4 (midpoint) produce BLOCKED; K2, K4 (no scenario link), K5 produce ADVISORY (downgrade conclusion language; do not independently block if all other checks pass).
+
 #### Summary: concrete required checks
 
 ```text
@@ -1789,6 +1999,11 @@ explicitly rather than note the issue and continue. The following loopbacks are 
 | C9 claim has no Facts Ledger ID | Stop C9; return to relevant earlier stage |
 | C9 introduces new evidence | Stop C9; return to relevant earlier stage |
 | Same load-bearing contradiction survives three repair cycles | Halt or human checkpoint |
+| C9 body uses mispricing language but market_implied_expectations.md absent or incomplete | BLOCKED (K1) — remove language or complete artefact with alternative rational explanation |
+| C9 body missing "Evidence that would change the conclusion" section or section has no falsifier | BLOCKED (K3) — add section; populate from working/falsification_triggers.md |
+| C2 base-case valuation is arithmetic midpoint of bull and bear | BLOCKED (K4) — replace midpoint with most evidence-supported scenario; relabel midpoint as blended sensitivity |
+| C2 per-share figure present but liability bridge rows 2–9 not all stated | ADVISORY (K5) — label per-share "bridge-incomplete"; cap per-share to directional only |
+| Standard/Full tier run but working/opposing_thesis.md absent and no opposing-thesis section in memo | ADVISORY (K2) — cap conclusion to thesis-tracking; add opposing-thesis statement |
 
 ---
 
