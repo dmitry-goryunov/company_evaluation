@@ -279,7 +279,11 @@ only when A1 marks it high-stakes.
   (§13). **Quality of earnings and cash conversion (§8A.17):** as part of B1, distinguish reported
   revenue, adjusted earnings, operating cash flow and sustainable free cash flow; record working-capital
   effects, one-offs, capitalised costs, maintenance capex, tax timing effects and any aggressive
-  adjusted-EBITDA add-backs in `working/quality_of_earnings_cash_conversion.md`. **Capital allocation
+  adjusted-EBITDA add-backs in `working/quality_of_earnings_cash_conversion.md`. Write the file in
+  `field_name: value` format (not a markdown table). Required fields: `ebitdax_reconciliation`,
+  `revenue_quality`, `one_off_items`, `decommissioning_cash_treatment`, `sustainable_cash_flow`,
+  `fcf_to_ebitdax_conversion`, `adjusted_earnings_flag`, `conclusion`. The K7 linter check requires
+  `sustainable_cash_flow: <non-blank value>` — a markdown table cell does not satisfy this check. **Capital allocation
   record (§8A.19):** begin `working/capital_allocation_record.md` at B1, recording M&A, buybacks,
   dividends, capex discipline, equity issuance and ROIC trend. Inherits management-promises data from B6.
 - **B2. Capital structure & dilution — HARDENED NUMERIC GATE** (§12). **Incentive and control map
@@ -343,9 +347,11 @@ are in label order for reference lookup.
   company's access to that market is evidenced by contracts, pilots, customer relationships, or other
   primary-source evidence. **Reference-class and base-rate check (§8A.16):** at C1, identify the
   closest reference class for the target's market position and competitive situation; populate
-  `working/reference_class_base_rate.md` with the `reference_class`, `base_rate_outcome`,
-  `impact_on_scenario_design` and `impact_on_c9_wording` fields. The reference class must inform C6
-  scenario design and C9 wording before those stages run.
+  `working/reference_class_base_rate.md` in `field_name: value` format (not a markdown table) with
+  the following fields: `exceptional_claim`, `reference_class`, `base_rate`, `why_may_differ`,
+  `conclusion`. The K6 linter check requires `why_may_differ: <non-blank value>` — a markdown table
+  cell does not satisfy this check. The reference class must inform C6 scenario design and C9 wording
+  before those stages run.
 - **C2. Valuation.** **Run only after C3 (capital required) and C6 (scenarios) have passed.** If run
   before C3 and C6, the output must be explicitly labelled preliminary and not decision-ready.
   Required inherited inputs: B1 verified financial spine; B2 allowed share-count basis; C1
@@ -822,6 +828,12 @@ guaranteed / certain / low-cost / best-in-class / independently verified
 Allowed only if supported by mature evidence and the relevant human decision gate has approved the
 wording. Otherwise replace with weaker evidence-stated wording.
 
+Investment-action standalone word scan: the linter also checks for the standalone words ADD, BUY,
+INVEST, ACCUMULATE, INITIATE, BUILD POSITION as whole words (case-insensitive) anywhere in the memo
+body, triggering CONTRADICTION_TYPE_1 and TYPE_2 regardless of context. Avoid these words as table
+row labels, accounting headers, or section titles — for example use "Plus: cash" rather than
+"Add: cash" in liability bridge tables.
+
 #### F. Source and citation consistency
 
 ```text
@@ -941,6 +953,11 @@ K4 — Scenario-first valuation:
   THEN: ADVISORY — label valuation "directional only"; add note: "Valuation outputs are
     directional only. Scenario assumptions are not sufficiently evidenced to support a
     decision-ready valuation."
+  Implementation note — K4 uses re.DOTALL: the linter matches the word "midpoint" anywhere
+  in the memo body against "bull" or "bear" appearing anywhere else in the body, across all
+  sections including depth-check tables and footnotes. Avoid the word "midpoint" in all memo
+  body text — not just the valuation section. Checklist rows that reference K4 should use
+  wording such as "not derived by averaging extremes" rather than "not an arithmetic midpoint".
 
 K5 — Full economic share-basis and liability bridge:
   IF memo body contains a per-share valuation figure
@@ -950,6 +967,9 @@ K5 — Full economic share-basis and liability bridge:
   THEN: ADVISORY — label per-share figure "bridge-incomplete (§8A.15)"; add note:
     "Per-share valuation is preliminary. Full economic bridge (liability reconciliation
     and share denominator from B2) is required before decision-ready."
+  Implementation note: the linter searches working/capital_structure.md for the exact
+  phrases "share denominator" (row 11) and "per-share output" (row 12) as defined in the
+  §8A.15 bridge template. Do not paraphrase these row labels.
 ```
 
 Severity guide for K-checks: K1, K3, K4 (midpoint) produce BLOCKED; K2, K4 (no scenario link), K5 produce ADVISORY (downgrade conclusion language; do not independently block if all other checks pass).
@@ -964,11 +984,15 @@ K6 — Reference-class and base-rate check:
      proven turnaround / structural re-rating]
   AND working/reference_class_base_rate.md does not exist
     OR why_may_differ field is blank or absent
-  THEN: BLOCKED — remove or qualify exceptional-outcome language; complete the artefact
+  THEN: ADVISORY (CAPPED) — cap exceptional-outcome language; complete the artefact
     with the reference class and deviation evidence.
   Standard cap wording: "The memo has not adequately tested the target against a
     reference class or base-rate outcome. Claims of exceptional performance are
     therefore capped."
+  Implementation note: the linter checks for "why_may_differ: <value>" as a key: value
+  colon-format line in working/reference_class_base_rate.md. A markdown table cell
+  (| why_may_differ | ... |) does not satisfy this check. Write the entire file in
+  field_name: value format (see field list at C1 stage description above).
 
 K7 — Quality of earnings and cash conversion:
   IF memo body or valuation table uses EBITDA, adjusted EBITDA, FCF, or
@@ -982,6 +1006,10 @@ K7 — Quality of earnings and cash conversion:
   Standard cap wording: "Valuation is capped because earnings quality and sustainable
     cash conversion have not been sufficiently tested. Reported or adjusted metrics
     may be directionally useful, but they are not decision-ready valuation inputs."
+  Implementation note: the linter checks for "sustainable_cash_flow: <value>" as a key: value
+  colon-format line in working/quality_of_earnings_cash_conversion.md. A markdown table cell
+  does not satisfy this check. Write the entire file in field_name: value format (see field
+  list at B1 stage description above).
 
 K8 — Incentive and control check:
   IF memo body contains triggering conditions:
