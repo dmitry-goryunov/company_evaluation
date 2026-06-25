@@ -954,10 +954,10 @@ K5 — Full economic share-basis and liability bridge:
 
 Severity guide for K-checks: K1, K3, K4 (midpoint) produce BLOCKED; K2, K4 (no scenario link), K5 produce ADVISORY (downgrade conclusion language; do not independently block if all other checks pass).
 
-#### L. Five second-layer depth controls
+#### K6–K10. Five second-layer depth controls
 
 ```text
-L1 — Reference-class and base-rate check:
+K6 — Reference-class and base-rate check:
   IF memo body contains exceptional-outcome language:
     [exceptional / durable outperformance / successful turnaround / re-rating /
      rerating / de-risking / sustained recovery / recovery thesis / recovery play /
@@ -970,51 +970,51 @@ L1 — Reference-class and base-rate check:
     reference class or base-rate outcome. Claims of exceptional performance are
     therefore capped."
 
-L2 — Quality of earnings and cash conversion:
+K7 — Quality of earnings and cash conversion:
   IF memo body or valuation table uses EBITDA, adjusted EBITDA, FCF, or
     guided-free-cash-flow valuation language:
     [EV/EBITDA / EV/EBITDAX / EBITDA multiple / FCF yield / free cash flow yield /
      capitalised earnings / guided FCF / adjusted FCF]
   AND working/quality_of_earnings_cash_conversion.md does not exist
     OR sustainable_cash_flow field is blank or absent
-  THEN: BLOCKED — label valuation "directional only — earnings quality not tested";
-    complete the artefact before using adjusted earnings or FCF as a valuation input.
+  THEN: ADVISORY (CAPPED) — label valuation "directional only — earnings quality not tested";
+    complete the artefact before using adjusted earnings or FCF as a decision-ready input.
   Standard cap wording: "Valuation is capped because earnings quality and sustainable
     cash conversion have not been sufficiently tested. Reported or adjusted metrics
     may be directionally useful, but they are not decision-ready valuation inputs."
 
-L3 — Incentive and control check:
+K8 — Incentive and control check:
   IF memo body contains triggering conditions:
     [controlling shareholder / dual-class / non-voting shares / preferred equity /
      sponsor / earn-out / earnout / related-party / management earnout / covenant control]
   AND working/incentive_control_map.md does not exist
-  THEN: ADVISORY — cap any governance or alignment positive wording to "not yet mapped";
+  THEN: ADVISORY (CAPPED) — cap any governance or alignment positive wording to "not yet mapped";
     complete the artefact.
   Standard cap wording: "Governance and alignment conclusions are capped because the
     incentive and control map is incomplete."
 
-L4 — Capital allocation check:
+K9 — Capital allocation check:
   IF memo body or C2 assumes future capital allocation value:
     [deleverage / deleveraging / buyback / share buyback / dividend growth /
      M&A integration / capex discipline / reinvestment / value-accretive acquisition]
   AND working/capital_allocation_record.md does not exist
-  THEN: ADVISORY — label those assumptions "untested against historical record";
+  THEN: ADVISORY (CAPPED) — label those assumptions "untested against historical record";
     complete the artefact.
   Standard cap wording: "Future value creation from capital allocation is not
     decision-ready. The memo has not sufficiently tested whether management's
     historical record supports the assumed use of capital."
 
-L5 — Monitoring and re-underwriting plan check:
+K10 — Re-underwriting and monitoring protocol check:
   IF memo body does not contain a "Monitoring" or "re-underwriting" section
     OR that section contains no variable rows
   AND working/monitoring_plan.md does not exist or is empty
-  THEN: BLOCKED — decision_status cannot be decision-ready; add monitoring section
-    or label memo as point-in-time research.
+  THEN: ADVISORY (CAPPED) — decision_status cannot be decision-ready except by explicit
+    human override; label conclusion as point-in-time research only.
   Standard cap wording: "The memo does not include a re-underwriting plan.
     The conclusion should be treated as point-in-time research only."
 ```
 
-Severity guide for L-checks: L1, L2, L5 produce BLOCKED; L3, L4 produce ADVISORY (cap language, do not independently block if all other checks pass).
+Severity guide for K6–K10: K6 produces ADVISORY (CAPPED) — conclusion language capped but memo not hard-blocked; K7–K10 produce ADVISORY (CAPPED) — valuation or conclusion language capped. None of K6–K10 independently produce BLOCKED; they degrade status to AUTO-REPAIRED if otherwise CLEAN, and add cap wording to the relevant sections.
 
 #### Summary: concrete required checks
 
@@ -1269,11 +1269,11 @@ explicitly rather than note the issue and continue. The following loopbacks are 
 | C2 base-case valuation is arithmetic midpoint of bull and bear | BLOCKED (K4) — replace midpoint with most evidence-supported scenario; relabel midpoint as blended sensitivity |
 | C2 per-share figure present but liability bridge rows 2–9 not all stated | ADVISORY (K5) — label per-share "bridge-incomplete"; cap per-share to directional only |
 | Standard/Full tier run but working/opposing_thesis.md absent and no opposing-thesis section in memo | ADVISORY (K2) — cap conclusion to thesis-tracking; add opposing-thesis statement |
-| C9 implies exceptional outcomes but reference_class_base_rate.md absent or why_may_differ blank | BLOCKED (L1) — remove exceptional language or complete artefact with deviation evidence |
-| C2 capitalises adjusted EBITDA/FCF but quality_of_earnings_cash_conversion.md absent or sustainable_cash_flow blank | BLOCKED (L2) — label valuation directional only; complete earnings-quality artefact |
-| Controlling shareholder / dual-class / preferred / sponsor in memo but incentive_control_map.md absent | ADVISORY (L3) — cap governance language; complete incentive and control map |
-| C2/C9 assumes deleverage/buyback/M&A integration but capital_allocation_record.md absent | ADVISORY (L4) — label capital allocation assumptions untested; complete artefact |
-| C9 lacks monitoring section and monitoring_plan.md absent | BLOCKED (L5) — conclusion limited to point-in-time research; add monitoring section |
+| C9 implies exceptional outcomes but reference_class_base_rate.md absent or why_may_differ blank | ADVISORY/CAPPED (K6) — cap exceptional-outcome language; complete artefact with reference class and deviation evidence |
+| C2 uses EBITDA/FCF multiple but quality_of_earnings_cash_conversion.md absent or sustainable_cash_flow blank | ADVISORY/CAPPED (K7) — label valuation directional only; complete earnings-quality artefact |
+| Controlling shareholder / dual-class / preferred / sponsor in memo but incentive_control_map.md absent | ADVISORY/CAPPED (K8) — cap governance/alignment language; complete incentive and control map |
+| C2/C9 assumes deleverage/buyback/M&A integration but capital_allocation_record.md absent | ADVISORY/CAPPED (K9) — label capital allocation assumptions untested; complete artefact |
+| C9 lacks monitoring section and monitoring_plan.md absent | ADVISORY/CAPPED (K10) — conclusion limited to point-in-time research; add monitoring section or human override |
 
 ---
 

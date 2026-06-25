@@ -87,7 +87,7 @@ MIDPOINT_PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
-# L1 — exceptional-outcome phrases that require reference_class_base_rate.md
+# K6 — exceptional-outcome phrases that require reference_class_base_rate.md
 EXCEPTIONAL_OUTCOME_PHRASES = [
     r"\bexceptional\s+(?:outcome|return|performance|result|case)\b",
     r"\bdurable\s+outperformance\b",
@@ -99,7 +99,7 @@ EXCEPTIONAL_OUTCOME_PHRASES = [
     r"\brecovery\s+(?:thesis|play|story|case)\b",
 ]
 
-# L2 — EBITDA/FCF multiples that require quality_of_earnings artefact
+# K7 — EBITDA/FCF multiples that require quality_of_earnings artefact
 EBITDA_FCF_PHRASES = [
     r"\bEV/EBITDA[X]?\b",
     r"\bEBITDA\s+multiple\b",
@@ -111,7 +111,7 @@ EBITDA_FCF_PHRASES = [
     r"\badjusted\s+FCF\b",
 ]
 
-# L3 — control structure triggers requiring incentive_control_map.md
+# K8 — control structure triggers requiring incentive_control_map.md
 CONTROL_STRUCTURE_PHRASES = [
     r"\bcontrolling\s+shareholder\b",
     r"\bdual.class\b",
@@ -124,7 +124,7 @@ CONTROL_STRUCTURE_PHRASES = [
     r"\bcovenant\s+control\b",
 ]
 
-# L4 — capital allocation assumption phrases requiring capital_allocation_record.md
+# K9 — capital allocation assumption phrases requiring capital_allocation_record.md
 CAPITAL_ALLOCATION_PHRASES = [
     r"\bdeleverage\b|\bdeleveraging\b",
     r"\bshare\s+buy.?back\b|\bbuy.?back\b",
@@ -135,7 +135,7 @@ CAPITAL_ALLOCATION_PHRASES = [
     r"\breinvestment\s+success\b",
 ]
 
-# L5 — monitoring section must exist in memo body
+# K10 — monitoring section must exist in memo body
 MONITORING_SECTION_PATTERN = re.compile(
     r"(?:monitoring|re.underwriting)\s+(?:plan|section|protocol)",
     re.IGNORECASE,
@@ -272,7 +272,7 @@ def check_liability_bridge(body_text, memo_dir):
 
 
 def check_exceptional_language(body_text, memo_dir):
-    """L1: exceptional-outcome language without reference_class_base_rate.md."""
+    """K6: exceptional-outcome language without reference_class_base_rate.md."""
     hits = [p for p in EXCEPTIONAL_OUTCOME_PHRASES if re.search(p, body_text, re.IGNORECASE)]
     if not hits:
         return False
@@ -284,7 +284,7 @@ def check_exceptional_language(body_text, memo_dir):
 
 
 def check_ebitda_quality(body_text, memo_dir):
-    """L2: EBITDA/FCF multiples without quality_of_earnings artefact."""
+    """K7: EBITDA/FCF multiples without quality_of_earnings artefact."""
     hits = [p for p in EBITDA_FCF_PHRASES if re.search(p, body_text, re.IGNORECASE)]
     if not hits:
         return False
@@ -296,7 +296,7 @@ def check_ebitda_quality(body_text, memo_dir):
 
 
 def check_incentive_map(body_text, memo_dir):
-    """L3 advisory: control-structure phrases without incentive_control_map.md."""
+    """K8 advisory: control-structure phrases without incentive_control_map.md."""
     hits = [p for p in CONTROL_STRUCTURE_PHRASES if re.search(p, body_text, re.IGNORECASE)]
     if not hits:
         return False
@@ -305,7 +305,7 @@ def check_incentive_map(body_text, memo_dir):
 
 
 def check_capital_allocation(body_text, memo_dir):
-    """L4 advisory: capital allocation assumptions without capital_allocation_record.md."""
+    """K9 advisory: capital allocation assumptions without capital_allocation_record.md."""
     hits = [p for p in CAPITAL_ALLOCATION_PHRASES if re.search(p, body_text, re.IGNORECASE)]
     if not hits:
         return False
@@ -314,7 +314,7 @@ def check_capital_allocation(body_text, memo_dir):
 
 
 def check_monitoring_plan(body_text, memo_dir):
-    """L5: no monitoring section in memo body and no monitoring_plan.md artefact."""
+    """K10: no monitoring section in memo body and no monitoring_plan.md artefact."""
     if MONITORING_SECTION_PATTERN.search(body_text):
         return False
     artefact = memo_dir / "working" / "monitoring_plan.md"
@@ -518,36 +518,39 @@ def lint(memo_path, decision_log_path=None):
         if status == "CLEAN":
             status = "AUTO-REPAIRED"
 
-    # --- L1: exceptional-outcome language without reference class artefact ---
+    # --- K6: exceptional-outcome language without reference class artefact (advisory/capped) ---
     if check_exceptional_language(body, memo_dir):
         findings.append({
-            "type": "DEPTH_CONTROL_L1",
-            "severity": "BLOCKED",
+            "type": "DEPTH_CONTROL_K6",
+            "severity": "ADVISORY",
             "detail": (
                 "Memo body contains exceptional-outcome language but "
                 "working/reference_class_base_rate.md is absent or has no why_may_differ field. "
-                "Remove or qualify the language, or complete the artefact (§8A.16)."
+                "Cap exceptional-outcome language or complete the artefact (§8A.16). "
+                "Cap wording: 'Claims of exceptional performance are therefore capped.'"
             ),
         })
-        status = "BLOCKED"
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
 
-    # --- L2: EBITDA/FCF multiples without quality-of-earnings artefact ---
+    # --- K7: EBITDA/FCF multiples without quality-of-earnings artefact (advisory/capped) ---
     if check_ebitda_quality(body, memo_dir):
         findings.append({
-            "type": "DEPTH_CONTROL_L2",
-            "severity": "BLOCKED",
+            "type": "DEPTH_CONTROL_K7",
+            "severity": "ADVISORY",
             "detail": (
                 "Memo body uses adjusted EBITDA or FCF-based valuation but "
                 "working/quality_of_earnings_cash_conversion.md is absent or sustainable_cash_flow "
                 "is blank. Label valuation 'directional only — earnings quality not tested' (§8A.17)."
             ),
         })
-        status = "BLOCKED"
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
 
-    # --- L3: control-structure phrases without incentive map (advisory) ---
+    # --- K8: control-structure phrases without incentive map (advisory/capped) ---
     if check_incentive_map(body, memo_dir):
         findings.append({
-            "type": "DEPTH_CONTROL_L3",
+            "type": "DEPTH_CONTROL_K8",
             "severity": "ADVISORY",
             "detail": (
                 "Memo body references controlling shareholder, dual-class, preferred equity, sponsor "
@@ -558,10 +561,10 @@ def lint(memo_path, decision_log_path=None):
         if status == "CLEAN":
             status = "AUTO-REPAIRED"
 
-    # --- L4: capital allocation assumptions without record artefact (advisory) ---
+    # --- K9: capital allocation assumptions without record artefact (advisory/capped) ---
     if check_capital_allocation(body, memo_dir):
         findings.append({
-            "type": "DEPTH_CONTROL_L4",
+            "type": "DEPTH_CONTROL_K9",
             "severity": "ADVISORY",
             "detail": (
                 "Memo body assumes value-accretive capital allocation (deleverage, buyback, dividend "
@@ -572,18 +575,20 @@ def lint(memo_path, decision_log_path=None):
         if status == "CLEAN":
             status = "AUTO-REPAIRED"
 
-    # --- L5: no monitoring section or artefact ---
+    # --- K10: no monitoring section or artefact (advisory/capped) ---
     if check_monitoring_plan(body, memo_dir):
         findings.append({
-            "type": "DEPTH_CONTROL_L5",
-            "severity": "BLOCKED",
+            "type": "DEPTH_CONTROL_K10",
+            "severity": "ADVISORY",
             "detail": (
                 "Memo body lacks a monitoring or re-underwriting section and "
                 "working/monitoring_plan.md is absent or empty. "
-                "Conclusion limited to point-in-time research; add monitoring section (§8A.20)."
+                "Conclusion limited to point-in-time research (§8A.20). "
+                "decision_status cannot be decision-ready without a monitoring plan or human override."
             ),
         })
-        status = "BLOCKED"
+        if status == "CLEAN":
+            status = "AUTO-REPAIRED"
 
     return status, findings
 

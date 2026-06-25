@@ -1,0 +1,25 @@
+c9_linter_status: AUTO-REPAIRED
+
+Expected findings (all must be present for this fixture to pass the negative test):
+
+[DEPTH_CONTROL_K2] (ADVISORY)
+  working/opposing_thesis.md is absent and no opposing-thesis section found in memo body.
+  Conclusion capped to thesis-tracking or decision-not-ready unless human review accepts the
+  residual risk.
+
+[DEPTH_CONTROL_K9] (ADVISORY)
+  Memo body assumes value-accretive capital allocation (deleverage, buyback, dividend growth,
+  M&A integration, reinvestment) but working/capital_allocation_record.md is absent. Label
+  those assumptions 'untested against historical record' (§8A.19).
+  Trigger phrases present: "deleveraging", "share buybacks", "dividend growth",
+  "M&A integration", "capex discipline".
+
+investment_action_allowed: no
+position_sizing_allowed: no
+conclusion_cap: THESIS-TRACKING
+
+K9 trigger condition:
+  One or more CAPITAL_ALLOCATION_PHRASES matched in memo body AND
+  working/capital_allocation_record.md is absent from the memo directory.
+  Linter adds AUTO-REPAIR label: capital allocation assumptions flagged as 'untested against
+  historical record'.

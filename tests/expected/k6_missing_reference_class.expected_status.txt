@@ -1,0 +1,24 @@
+c9_linter_status: AUTO-REPAIRED
+
+Expected findings (all must be present for this fixture to pass the negative test):
+
+[DEPTH_CONTROL_K2] (ADVISORY)
+  working/opposing_thesis.md is absent and no opposing-thesis section found in memo body.
+  Conclusion capped to thesis-tracking or decision-not-ready unless human review accepts the
+  residual risk.
+
+[DEPTH_CONTROL_K6] (ADVISORY)
+  Memo body contains exceptional-outcome language but working/reference_class_base_rate.md
+  is absent or has no why_may_differ field. Cap exceptional-outcome language or complete the
+  artefact (§8A.16).
+  Trigger phrases present: "successful turnaround", "durable outperformance", "structural re-rating".
+
+investment_action_allowed: no
+position_sizing_allowed: no
+conclusion_cap: THESIS-TRACKING
+
+K6 trigger condition:
+  One or more EXCEPTIONAL_OUTCOME_PHRASES matched in memo body AND
+  working/reference_class_base_rate.md is absent from the memo directory.
+  Linter adds AUTO-REPAIR cap text to conclusion: 'Claims of exceptional performance are
+  therefore capped.'

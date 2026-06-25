@@ -1,0 +1,25 @@
+c9_linter_status: AUTO-REPAIRED
+
+Expected findings (all must be present for this fixture to pass the negative test):
+
+[DEPTH_CONTROL_K2] (ADVISORY)
+  working/opposing_thesis.md is absent and no opposing-thesis section found in memo body.
+  Conclusion capped to thesis-tracking or decision-not-ready unless human review accepts the
+  residual risk.
+
+[DEPTH_CONTROL_K8] (ADVISORY)
+  Memo body references controlling shareholder, dual-class, preferred equity, sponsor or similar
+  structure but working/incentive_control_map.md is absent. Cap governance/alignment language;
+  complete the artefact (§8A.18).
+  Trigger phrases present: "controlling shareholder", "dual-class shares", "related-party",
+  "sponsor".
+
+investment_action_allowed: no
+position_sizing_allowed: no
+conclusion_cap: THESIS-TRACKING
+
+K8 trigger condition:
+  One or more CONTROL_STRUCTURE_PHRASES matched in memo body AND
+  working/incentive_control_map.md is absent from the memo directory.
+  Linter adds AUTO-REPAIR cap text: governance/alignment language capped pending
+  artefact completion.

@@ -235,3 +235,49 @@
     `check_incentive_map`, `check_capital_allocation`, `check_monitoring_plan`) and
     integrated into `lint()`. L1/L2/L5 produce BLOCKED; L3/L4 produce ADVISORY
     (AUTO-REPAIRED if otherwise CLEAN).
+
+---
+
+| 2026-06-25 | patch-2026-06-25c-addendum | Rename L1–L5 to K6–K10; downgrade K6/K7/K10 severity to ADVISORY | L1–L5 naming was inconsistent with the K1–K5 naming convention established in patch-2026-06-25b. Severity of K6 (reference class), K7 (quality of earnings), and K10 (monitoring plan) was set to BLOCKED in the initial implementation but the approving memo specified these as ADVISORY (CAPPED). Fix aligns implementation with intent. | patch-2026-06-25c post-implementation review | User (Remaining Process and Implementation Updates memo, 2026-06-25) | pipeline_reference.md, checks/c9_policy_linter.py, tests/ | Revert by reverting pipeline_reference.md and c9_policy_linter.py to commit 68369bd; delete five new fixture and expected-output files. |
+
+## Patch detail (patch-2026-06-25c-addendum)
+
+### Changes to pipeline_reference.md
+
+1. **§10A.5 section header** — Renamed "#### L. Five second-layer depth controls" to
+   "#### K6–K10. Five second-layer depth controls".
+
+2. **§10A.5 check labels** — Renamed L1→K6, L2→K7, L3→K8, L4→K9, L5→K10 in all
+   check descriptions and explanatory text.
+
+3. **Severity corrections** — K6 (was BLOCKED) → ADVISORY (CAPPED); K7 (was BLOCKED) →
+   ADVISORY (CAPPED); K10 (was BLOCKED) → ADVISORY (CAPPED). K8 and K9 remain ADVISORY.
+   Severity guide table updated accordingly.
+
+4. **§10D loopback table** — Updated L1–L5 column labels to K6–K10.
+
+### Changes to checks/c9_policy_linter.py
+
+5. **Finding codes** — Renamed DEPTH_CONTROL_L1→K6, L2→K7, L3→K8, L4→K9, L5→K10
+   throughout `lint()` and all check functions.
+
+6. **Severity downgrade** — K6 (`check_exceptional_language`): changed from BLOCKED to
+   ADVISORY; K7 (`check_ebitda_quality`): changed from BLOCKED to ADVISORY; K10
+   (`check_monitoring_plan`): changed from BLOCKED to ADVISORY. Exit code for these
+   checks changes from 1 to 2 (AUTO-REPAIRED if otherwise CLEAN).
+
+### New files
+
+7. **Five test fixtures** (tests/fixtures/):
+   - `k6_missing_reference_class.md` — triggers K6 + K2; must produce AUTO-REPAIRED
+   - `k7_missing_quality_of_earnings.md` — triggers K7 + K2; must produce AUTO-REPAIRED
+   - `k8_missing_incentive_control_map.md` — triggers K8 + K2; must produce AUTO-REPAIRED
+   - `k9_missing_capital_allocation_record.md` — triggers K9 + K2; must produce AUTO-REPAIRED
+   - `k10_missing_monitoring_plan.md` — triggers K10 + K2; must produce AUTO-REPAIRED
+
+8. **Five expected output files** (tests/expected/):
+   - `k6_missing_reference_class.expected_status.txt`
+   - `k7_missing_quality_of_earnings.expected_status.txt`
+   - `k8_missing_incentive_control_map.expected_status.txt`
+   - `k9_missing_capital_allocation_record.expected_status.txt`
+   - `k10_missing_monitoring_plan.expected_status.txt`
