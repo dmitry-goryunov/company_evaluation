@@ -5,7 +5,7 @@
 > - `pipeline_reference.md` (canonical — reference, read by section on demand)
 >
 > To update this file, edit the canonical sources and re-run `python build_dist.py`.
-> Generated: 2026-06-25 14:20 UTC
+> Generated: 2026-06-25 18:09 UTC
 
 ---
 
@@ -532,10 +532,77 @@ pre-revenue, pre-economic, pre-commercial, litigation-dependent, regulatory-depe
 distressed, or milestone-dependent companies, the default maximum action label is "thesis-tracking" or
 "speculative exposure only" unless upgraded by specific evidence.
 
+**C8-blocker rule:** If any C8 question classified as "must-answer before decision" is unresolved in
+`working/open_questions.md`, the C9 memo must carry `allowed_conclusion_language: decision-not-ready`
+and must not contain investment-action language (position sizing, entry price, stop-loss, initiation
+recommendation). The investment action field must read "none — pending resolution of must-answer items"
+unless `final/decision_log.md` records an explicit human override specifying that each unresolved item
+does not block the investment action.
+
+Prohibited in C9 when `unresolved_must_answer_count > 0` (absent human override):
+
+```text
+INVEST WITH CONDITIONS / BUY / ADD / conviction
+initiate position / build position / full position / target position
+any position-sizing recommendation or percentage allocation
+investment recommendation / recommended allocation / entry at [price]
+```
+
+Required replacement when must-answer items remain:
+
+```text
+DECISION-NOT-READY / THESIS TRACKING.
+The evidence supports a potentially attractive setup, but unresolved must-answer items prevent a
+decision-ready recommendation. No position-sizing guidance is provided until blockers are resolved
+or explicitly accepted by human review recorded in final/decision_log.md.
+```
+
 ### 8A.11 Final memo mandatory status block
 
-Every C9 memo must include the following block near the top (Screen uses a short form covering objective,
-tier, valuation level, recommendation cap and decision-approved).
+Every C9 memo must include **both** of the following blocks near the top (within the first 500 words,
+before the executive conclusion). Screen tier uses a short form covering objective, tier, valuation
+level, recommendation cap and decision-approved only.
+
+**Machine-readable YAML block (required first):**
+
+```yaml
+## c9_status_block
+c9_status: CLEAN | AUTO-REPAIRED | BLOCKED
+gate_mode: AUTO | MANUAL
+human_review_performed: yes | no
+investment_decision_approved: yes | no
+c0_recommendation_cap: [cap label from C0]
+unresolved_must_answer_count: [integer]
+unresolved_high_risk_count: [integer]
+unresolved_critical_gap_count: [integer]
+allowed_conclusion_language: thesis-tracking | decision-not-ready | human-decision-candidate | decision-approved
+investment_action_allowed: yes | no
+position_sizing_allowed: yes | no
+```
+
+**Mandatory derivation rules (enforced by C9 linter):**
+
+```text
+If human_review_performed = no:
+  investment_action_allowed = no
+  position_sizing_allowed = no
+  investment_decision_approved = no
+
+If unresolved_must_answer_count > 0:
+  allowed_conclusion_language = decision-not-ready
+  investment_action_allowed = no
+  position_sizing_allowed = no
+  (unless final/decision_log.md records explicit human override with open_items_reviewed listed)
+
+If c9_status = BLOCKED:
+  memo must not be presented as a final investment memo
+  memo must state it cannot be used as a decision basis
+```
+
+The C9 linter must refuse to emit status CLEAN if any field in either block is blank or if any
+derivation rule above is violated. An unfilled field is treated as a hard blocker.
+
+**Human-readable markdown table (required second):**
 
 ```md
 ## Decision-readiness status
@@ -578,7 +645,11 @@ HALT, or downgrade the final conclusion, if:
 - the C9 linter status is BLOCKED;
 - the same load-bearing contradiction survives three self-repair cycles;
 - legal entity, ownership basis, share count, or valuation basis cannot be verified;
-- the memo's recommendation exceeds the C0 recommendation cap and no human override exists.
+- the memo's recommendation exceeds the C0 recommendation cap and no human override exists;
+- `unresolved_must_answer_count > 0` and `final/decision_log.md` does not record an explicit human
+  override with `open_items_reviewed` listed;
+- any required artefact in the C9 artefact-presence check list (§21) is absent or empty;
+- the c9_status_block YAML is absent, incomplete, or its derivation rules are violated.
 
 > *Validated in practice:* a B2 reference run was halted at the VERIFY step when NotebookLM
 > authentication expired. The gate behaved correctly — it refused to pass cap-table figures that could
@@ -595,6 +666,35 @@ register exists; tier recorded; Facts Ledger / assumptions log / open questions 
 exist; deterministic check scripts exist or can be generated and saved; human approval template exists;
 clean-room process defined; injection scanner exists; memo template exists; `.env` excluded from VCS;
 no credentials in the repo; **a test run completed on at least one numeric check and one stage.**
+
+### C9 artefact-presence check list
+
+Before C9 can emit any output, verify the following artefacts exist and are non-empty. A missing or
+empty artefact causes C9 status = BLOCKED. The linter must check each item explicitly; it may not
+infer presence from conversation context.
+
+```text
+Required (hard blockers if absent):
+  working/facts_ledger.md           — append-only ledger with at least one entry
+  working/evidence_gaps.md          — gap register (may be empty if none found, but file must exist)
+  working/open_questions.md         — open questions (may contain only "none" if resolved)
+  final/decision_log.md             — at least one entry
+  working/c9_linter_report.md       — linter output from current run (not a prior run)
+  working/c9_repair_log.md          — repair log from current run (may state "no repairs needed")
+  working/[claim_audit].md          — C0 claim audit output (filename per company convention)
+  working/disconfirming_evidence.md — §10B table
+
+Source evidence (either satisfies the requirement):
+  sources/source_register.csv       — populated with at least one entry, OR
+  notebooklm_outputs/raw/           — non-empty directory with at least one stage output file
+  (A pre-loaded NotebookLM notebook with outputs saved to notebooklm_outputs/raw/ is accepted as
+   an alternative to a local source_register.csv when sources were pre-uploaded to the notebook.)
+
+Rule: if the final memo claims "all load-bearing claims are sourced" but neither sources/source_register.csv
+nor notebooklm_outputs/raw/ is inspectable, the claim is false and C9 status = BLOCKED.
+
+Rule: a stage has not passed if its output cannot be independently inspected from saved files.
+```
 
 ## 22. Directory structure
 
@@ -1033,6 +1133,28 @@ are in label order for reference lookup.
   | Market data refreshed | yes / no | valuation stale |
   | Valuation evidence level assigned | 0–6 | recommendation capped per §8A.5 |
 
+  **C2 valuation output schema.** Every valuation table must include the following columns. A
+  valuation row missing any column is incomplete and the linter must flag it.
+
+  | Column | Description |
+  |---|---|
+  | `method` | EV/EBITDAX, FCF yield, 2P NAV, DCF, transaction comps, etc. |
+  | `value` | Central point or range in per-share terms (state currency and pence/dollars) |
+  | `share_basis` | basic / voting / FD_low / FD_base / FD_high |
+  | `share_count_used` | Exact count used (millions) |
+  | `net_debt_basis` | Reported / adjusted / full (state what is included/excluded) |
+  | `hybrid_treatment` | Included in debt / equity / excluded — stated explicitly |
+  | `decommissioning_treatment` | In EV / excluded / shown separately |
+  | `capital_need_treatment` | Pre-financing / pro-forma diluted / not applicable |
+  | `scenario_link` | Bull / base / bear / all — which scenario drives this method |
+  | `evidence_level` | 0–6 per §8A.5 |
+  | `fact_ids` | Comma-separated Facts Ledger IDs supporting inputs |
+  | `decision_maturity` | Decision-ready / directional only / not usable |
+
+  **Rules:** headline price targets must use the same share basis as the C0/C2 permission table, or
+  show voting and fully diluted values side by side. If B2 marks the fully diluted basis as material,
+  C2 and C9 must not headline voting-share valuation alone.
+
   *Human checkpoint #4.*
 - **C3. Capital required** (bridge/base/scale/downside). **Run before C2.** Required outputs:
   current cash and burn; runway; bridge/base/scale/downside funding need; likely financing instrument;
@@ -1073,12 +1195,46 @@ are in label order for reference lookup.
   observations, inferences, assumptions, confirming evidence, disproving evidence, expected financing
   path, expected dilution path. **Rule:** the base case must be the most evidence-supported case, not
   a midpoint between bull and bear.
+
+  **C6 scenario output schema.** Each scenario must include all ten fields. A scenario missing any
+  field cannot support C2 valuation and must be labelled incomplete.
+
+  | Field | Description |
+  |---|---|
+  | `scenario_name` | bull / base / bear (or labelled variant) |
+  | `operating_assumption` | Key operating driver (e.g. oil price range, production rate, sales volume) |
+  | `capital_assumption` | Capex, funding need, and source (debt / equity / internal cash) |
+  | `dilution_assumption` | Expected share-count change under this scenario; "nil" if none |
+  | `timing_assumption` | When the scenario crystallises; key milestone dates |
+  | `evidence_for` | Facts / observations supporting this scenario |
+  | `evidence_against` | Facts / observations working against this scenario |
+  | `falsifier` | Single fact or event that would eliminate this scenario entirely |
+  | `valuation_relevance` | Which C2 method or input this scenario drives (e.g. EV/EBITDAX, FCF yield) |
+  | `risk_link` | Comma-separated C7 risk IDs that determine this scenario's probability |
+
+  **Rules:** the base case must be the most evidence-supported case, not a midpoint between bull and
+  bear. If a scenario lacks capital or dilution assumptions, it cannot support C2 valuation.
 - **C7. Risk register** — discrete. Rank by severity, probability, detectability, time horizon,
   mitigants, monitoring signal. Includes governance risks from B6. **Mechanical cap:** any unresolved
   High or Critical risk affecting valuation, ownership, legal status, financing, product readiness,
   customer traction, regulatory status or going concern must propagate to: (1) C0 recommendation cap;
   (2) C2 valuation caveat; (3) C9 decision-readiness status block; (4) C8 management questions if the
   risk is answerable by the company. These propagations are mandatory, not discretionary.
+
+  **C7 hard propagation rule.** For every risk rated High or Critical, the following must all be
+  true before C9 can pass. The C9 linter checks each risk ID explicitly.
+
+  ```text
+  Hard propagation checklist per unresolved High/Critical risk:
+  □ Risk appears by ID in C9 §risk summary (not only in appendix)
+  □ Risk appears in C0 recommendation cap with matching severity
+  □ Risk appears in C2 valuation caveat or drives scenario assumption
+  □ Risk generates a C8 question if answerable by management
+  □ Risk is reflected in unresolved_high_risk_count in c9_status_block YAML
+  ```
+
+  A Critical risk may be disclosed and accepted only if human review is recorded in
+  `final/decision_log.md`. AUTO mode may not silently accept a Critical risk.
 - **C8. Management questions** — discrete. Classify every question into one of three classes before
   C9:
 
@@ -1350,6 +1506,41 @@ wording. Otherwise replace with weaker evidence-stated wording.
   appears elsewhere in the memo.
 ```
 
+#### J. Contradiction checks (status block vs prose)
+
+The linter must search for contradictions between c9_status_block YAML field values and the memo
+body text. Any surviving contradiction after repair causes c9_status = BLOCKED.
+
+```text
+Contradiction type 1 — human_review / investment action:
+  IF human_review_performed = no
+  AND memo body contains: "investment approved" / "recommended allocation" / "initiate position" /
+      "build position" / "target position" / "full position" / any percentage allocation / "buy" /
+      "BUY" / "INVEST WITH CONDITIONS" / position-sizing language
+  THEN: BLOCKED — remove investment-action language; replace with decision-not-ready wording.
+
+Contradiction type 2 — must-answer count / recommendation:
+  IF unresolved_must_answer_count > 0
+  AND memo body contains investment-action language as listed above
+  THEN: BLOCKED — C8-blocker rule violated; must-answer items must be resolved or human override
+        recorded in final/decision_log.md before investment-action language is permitted.
+
+Contradiction type 3 — c9_status CLEAN / open items:
+  IF c9_status = CLEAN
+  AND (unresolved_high_risk_count > 0 OR unresolved_must_answer_count > 0)
+  AND no human override is recorded in final/decision_log.md
+  THEN: BLOCKED — status CLEAN is inconsistent with open items; downgrade to AUTO-REPAIRED or
+        BLOCKED as appropriate.
+
+Contradiction type 4 — sourcing claim / artefact absence:
+  IF memo body claims "all load-bearing claims are sourced" or equivalent
+  AND neither sources/source_register.csv nor notebooklm_outputs/raw/ is inspectable
+  THEN: BLOCKED — sourcing claim is unverifiable; remove or qualify the claim.
+```
+
+**Negative test fixture:** `tests/fixtures/harbour_memo_unresolved_c8.md` demonstrates all four
+contradiction types and must produce c9_status = BLOCKED when run through `checks/c9_policy_linter.py`.
+
 #### Summary: concrete required checks
 
 ```text
@@ -1593,7 +1784,8 @@ explicitly rather than note the issue and continue. The following loopbacks are 
 | C4 M&A thesis unsupported (Level 0–2) | Downgrade to optionality only; C9 must not imply likely acquisition |
 | C5 listing or comps thesis unsupported | Downgrade to context only |
 | C7 High/Critical unresolved risk | Propagate cap to C0, C2 and C9; add to C8 if answerable |
-| C8 must-answer question unresolved | Return to source acquisition/A1 or C9 decision-not-ready |
+| C8 must-answer question unresolved | Return to source acquisition/A1 or C9 decision-not-ready; remove all investment-action language unless human override in decision_log.md |
+| C8 unresolved + investment-action language in draft C9 | BLOCKED — contradiction type 2; apply C8-blocker rule; status = DECISION-NOT-READY |
 | C9 claim has no Facts Ledger ID | Stop C9; return to relevant earlier stage |
 | C9 introduces new evidence | Stop C9; return to relevant earlier stage |
 | Same load-bearing contradiction survives three repair cycles | Halt or human checkpoint |
@@ -1779,6 +1971,36 @@ share basis; escalation decisions; repair cycles run; final sign-off status.
 A1 source sufficiency · B2 cap table · after-B5 product and operational readiness · C2 valuation
 (after C3 and C6) · C9 final memo. Each uses the checkpoint packet (§16) and records an approval
 (Appendix D).
+
+### Decision-log override protocol
+
+A human reviewer may override a pipeline-imposed cap or blocker, but the override must be explicit
+and recorded in `final/decision_log.md` using the following 10-field YAML structure. An override
+without all required fields is invalid and must not be treated as having been granted.
+
+```yaml
+## decision_log_override
+reviewer: [name or role]
+review_date: [ISO 8601 date]
+review_scope: [which stage(s) or finding(s) are being overridden]
+open_items_reviewed: [list each unresolved must-answer item, high risk, or gap being overridden]
+override_granted: yes | no
+override_reason: [why the unresolved item does not block the investment action in the reviewer's judgement]
+accepted_risks: [list each risk or gap explicitly accepted by the reviewer]
+position_sizing_approved: yes | no
+approved_action: [exact investment action approved — e.g. "initiate at 3% position at ≤240p"]
+follow_up_required: [what must happen next — e.g. "monitor arbitration outcome; reassess if adverse"]
+```
+
+**Rules for override:**
+- An override may permit investment-action wording, but must not remove disclosure of the unresolved
+  issue. The final memo must still state the open item and the override basis side by side.
+- `open_items_reviewed` must name every must-answer question, high risk, and critical gap being
+  overridden; a blanket "all open items" is not valid.
+- An override of a Critical risk requires `review_scope` to reference the specific risk ID.
+- The C9 linter checks that `open_items_reviewed` lists at least as many items as
+  `unresolved_must_answer_count` in the c9_status_block. If not, the override is incomplete.
+- AUTO mode cannot grant an override; only a human reviewer may populate this block.
 
 ## §25 — Appendices (templates)
 

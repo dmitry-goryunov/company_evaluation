@@ -1,0 +1,35 @@
+c9_linter_status: BLOCKED
+
+Expected findings (all must be present for this fixture to pass the negative test):
+
+[CONTRADICTION_TYPE_1] human_review_performed = no but memo contains investment-action language.
+  Specifically: "INVEST WITH CONDITIONS", "50% target position", "Initiate at 50%", "target position".
+  Required action: replace recommendation section with DECISION-NOT-READY wording.
+
+[CONTRADICTION_TYPE_2] unresolved_must_answer_count = 3 but memo contains investment-action language.
+  C8-blocker rule violated: three must-answer questions (C8-01, C8-02, C8-03) are unresolved.
+  Required action: remove investment-action language; apply DECISION-NOT-READY template.
+
+[CONTRADICTION_TYPE_3] c9_status = CLEAN but unresolved_must_answer_count = 3 and
+  unresolved_high_risk_count = 4 with no human override in decision_log.md.
+  Required action: downgrade c9_status to BLOCKED.
+
+[CONTRADICTION_TYPE_4] Memo claims "all load-bearing claims are sourced" but evidence pack
+  (sources/source_register.csv or notebooklm_outputs/raw/) is absent or empty.
+  Required action: remove or qualify the sourcing claim.
+
+investment_action_allowed: no
+position_sizing_allowed: no
+human_review_required: yes
+
+Correct memo conclusion for this fixture:
+  DECISION-NOT-READY / THESIS TRACKING.
+  Harbour Energy appears to present a potentially attractive deep-value public-equity setup
+  based on the memo's stated financials, valuation and risk/reward framing. However, three
+  unresolved must-answer items remain open: Wintershall Dea leakage arbitration, Mittelplate
+  operating permit appeal and LetterOne C-share conversion timing.
+
+  Because these issues affect downside, dilution, valuation and timing, this AUTO-run output
+  cannot make an investment recommendation or position-sizing proposal. The memo is a research
+  artefact for human review. Investment-action language requires either resolution of the
+  blockers or explicit human override recorded in final/decision_log.md.

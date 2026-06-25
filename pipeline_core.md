@@ -521,10 +521,77 @@ pre-revenue, pre-economic, pre-commercial, litigation-dependent, regulatory-depe
 distressed, or milestone-dependent companies, the default maximum action label is "thesis-tracking" or
 "speculative exposure only" unless upgraded by specific evidence.
 
+**C8-blocker rule:** If any C8 question classified as "must-answer before decision" is unresolved in
+`working/open_questions.md`, the C9 memo must carry `allowed_conclusion_language: decision-not-ready`
+and must not contain investment-action language (position sizing, entry price, stop-loss, initiation
+recommendation). The investment action field must read "none — pending resolution of must-answer items"
+unless `final/decision_log.md` records an explicit human override specifying that each unresolved item
+does not block the investment action.
+
+Prohibited in C9 when `unresolved_must_answer_count > 0` (absent human override):
+
+```text
+INVEST WITH CONDITIONS / BUY / ADD / conviction
+initiate position / build position / full position / target position
+any position-sizing recommendation or percentage allocation
+investment recommendation / recommended allocation / entry at [price]
+```
+
+Required replacement when must-answer items remain:
+
+```text
+DECISION-NOT-READY / THESIS TRACKING.
+The evidence supports a potentially attractive setup, but unresolved must-answer items prevent a
+decision-ready recommendation. No position-sizing guidance is provided until blockers are resolved
+or explicitly accepted by human review recorded in final/decision_log.md.
+```
+
 ### 8A.11 Final memo mandatory status block
 
-Every C9 memo must include the following block near the top (Screen uses a short form covering objective,
-tier, valuation level, recommendation cap and decision-approved).
+Every C9 memo must include **both** of the following blocks near the top (within the first 500 words,
+before the executive conclusion). Screen tier uses a short form covering objective, tier, valuation
+level, recommendation cap and decision-approved only.
+
+**Machine-readable YAML block (required first):**
+
+```yaml
+## c9_status_block
+c9_status: CLEAN | AUTO-REPAIRED | BLOCKED
+gate_mode: AUTO | MANUAL
+human_review_performed: yes | no
+investment_decision_approved: yes | no
+c0_recommendation_cap: [cap label from C0]
+unresolved_must_answer_count: [integer]
+unresolved_high_risk_count: [integer]
+unresolved_critical_gap_count: [integer]
+allowed_conclusion_language: thesis-tracking | decision-not-ready | human-decision-candidate | decision-approved
+investment_action_allowed: yes | no
+position_sizing_allowed: yes | no
+```
+
+**Mandatory derivation rules (enforced by C9 linter):**
+
+```text
+If human_review_performed = no:
+  investment_action_allowed = no
+  position_sizing_allowed = no
+  investment_decision_approved = no
+
+If unresolved_must_answer_count > 0:
+  allowed_conclusion_language = decision-not-ready
+  investment_action_allowed = no
+  position_sizing_allowed = no
+  (unless final/decision_log.md records explicit human override with open_items_reviewed listed)
+
+If c9_status = BLOCKED:
+  memo must not be presented as a final investment memo
+  memo must state it cannot be used as a decision basis
+```
+
+The C9 linter must refuse to emit status CLEAN if any field in either block is blank or if any
+derivation rule above is violated. An unfilled field is treated as a hard blocker.
+
+**Human-readable markdown table (required second):**
 
 ```md
 ## Decision-readiness status
@@ -567,7 +634,11 @@ HALT, or downgrade the final conclusion, if:
 - the C9 linter status is BLOCKED;
 - the same load-bearing contradiction survives three self-repair cycles;
 - legal entity, ownership basis, share count, or valuation basis cannot be verified;
-- the memo's recommendation exceeds the C0 recommendation cap and no human override exists.
+- the memo's recommendation exceeds the C0 recommendation cap and no human override exists;
+- `unresolved_must_answer_count > 0` and `final/decision_log.md` does not record an explicit human
+  override with `open_items_reviewed` listed;
+- any required artefact in the C9 artefact-presence check list (§21) is absent or empty;
+- the c9_status_block YAML is absent, incomplete, or its derivation rules are violated.
 
 > *Validated in practice:* a B2 reference run was halted at the VERIFY step when NotebookLM
 > authentication expired. The gate behaved correctly — it refused to pass cap-table figures that could
@@ -584,6 +655,35 @@ register exists; tier recorded; Facts Ledger / assumptions log / open questions 
 exist; deterministic check scripts exist or can be generated and saved; human approval template exists;
 clean-room process defined; injection scanner exists; memo template exists; `.env` excluded from VCS;
 no credentials in the repo; **a test run completed on at least one numeric check and one stage.**
+
+### C9 artefact-presence check list
+
+Before C9 can emit any output, verify the following artefacts exist and are non-empty. A missing or
+empty artefact causes C9 status = BLOCKED. The linter must check each item explicitly; it may not
+infer presence from conversation context.
+
+```text
+Required (hard blockers if absent):
+  working/facts_ledger.md           — append-only ledger with at least one entry
+  working/evidence_gaps.md          — gap register (may be empty if none found, but file must exist)
+  working/open_questions.md         — open questions (may contain only "none" if resolved)
+  final/decision_log.md             — at least one entry
+  working/c9_linter_report.md       — linter output from current run (not a prior run)
+  working/c9_repair_log.md          — repair log from current run (may state "no repairs needed")
+  working/[claim_audit].md          — C0 claim audit output (filename per company convention)
+  working/disconfirming_evidence.md — §10B table
+
+Source evidence (either satisfies the requirement):
+  sources/source_register.csv       — populated with at least one entry, OR
+  notebooklm_outputs/raw/           — non-empty directory with at least one stage output file
+  (A pre-loaded NotebookLM notebook with outputs saved to notebooklm_outputs/raw/ is accepted as
+   an alternative to a local source_register.csv when sources were pre-uploaded to the notebook.)
+
+Rule: if the final memo claims "all load-bearing claims are sourced" but neither sources/source_register.csv
+nor notebooklm_outputs/raw/ is inspectable, the claim is false and C9 status = BLOCKED.
+
+Rule: a stage has not passed if its output cannot be independently inspected from saved files.
+```
 
 ## 22. Directory structure
 

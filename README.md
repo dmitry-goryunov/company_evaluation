@@ -195,7 +195,12 @@ Claude Code will run each stage sequentially:
 |---|---|---|
 | **A — Scope & source integrity** | A1 | Checks if the research mandate is answerable from your sources. Halts if not. |
 | **B — Evidence spine** | B1–B6 | Financial spine → cap table → business model → asset evidence → management track record. Python scripts verify every key number. |
-| **C — Judgement** | C0–C9 | Claim audit (C0) → market/competition → capital requirements → scenarios → valuation → M&A/comps → risks → management questions → final memo |
+| **C — Judgement** | C0–C9 | Claim audit and confidence caps (C0) → market and competition (C1) → capital required (C3) → scenarios (C6) → valuation (C2) → M&A and strategic options (C4) → listing and comparables (C5) → risks (C7) → management questions (C8) → final memo (C9) |
+
+**Important:** the C-stage execution order is C0 → C1 → C3 → C6 → C2 → C4 → C5 → C7 → C8 → C9.
+C3 (capital required) and C6 (scenarios) run **before** C2 (valuation) because valuation must price
+defined scenarios and reflect the known dilution path. C4 and C5 run after C2 as overlays and sanity
+checks. The numerical order C0–C9 does not match the execution order.
 
 At each human gate (MANUAL mode), Claude will present a structured checkpoint packet and wait for one of:
 - `approve` — proceed to next stage
@@ -264,18 +269,23 @@ The pipeline creates the following structure in your working directory:
 
 ---
 
-## Research objectives
+## Common research objectives
 
 The pipeline adapts to different research objectives. At the start of a run, select one:
 
 | Objective | Key mandatory stages |
 |---|---|
 | Public equity investment | A1, B1, B2, B6, C0–C9 |
-| Private investment / VC / growth | A1, B1–B6, C0–C9 |
+| Private investment / VC / growth equity | A1, B1–B6, C0–C9 |
 | Credit / lending | A1, B1, C3, C7 |
 | M&A target diligence | A1, B1–B6, C0–C9 |
 | Supplier / vendor diligence | A1, B1, B4, B5, B6, C7 |
 | General company profile | A1, B1, B3, B6, C1, C7, C9-lite |
+| IPO / pre-IPO assessment | A1, B1–B6, C0–C9 |
+| Distressed / turnaround | A1, B1, B2, C3, C7, C9 |
+| Competitor benchmarking | A1, B1, B3, B4, C1, C5, C7 |
+| ESG / governance screen | A1, B6, C7, C9-lite |
+| Technology or sector deep-dive | A1, B3, B4, B5, C1, C4, C7 |
 
 ---
 
