@@ -1,0 +1,12 @@
+# Enforce LF line endings in the repository for all text files.
+# This prevents CRLF/BOM artifacts from Windows tooling appearing on GitHub.
+
+* text=auto eol=lf
+
+*.py   text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.csv  text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
