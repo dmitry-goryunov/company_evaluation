@@ -2,3 +2,24 @@ __pycache__/
 *.pyc
 *.pyo
 .DS_Store
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+build/
+*.egg-info/
+dist/*.whl
+
+# Local credentials and browser sessions
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+client_secret*.json
+credentials*.json
+token*.json
+master_token.json
+storage_state.json

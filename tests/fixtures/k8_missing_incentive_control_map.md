@@ -1,5 +1,9 @@
 ## c9_status_block
-c9_status: CLEAN
+schema_version: 1
+run_id: fixture-k8
+research_objective: public-equity
+tier: STANDARD
+c9_status: WARNINGS
 gate_mode: AUTO
 human_review_performed: no
 investment_decision_approved: no
@@ -45,4 +49,4 @@ verified. The sponsor has held its stake since a 2019 leveraged buyout and may f
 ---
 
 Note: `working/incentive_control_map.md` is intentionally absent.
-This fixture must trigger K8 (ADVISORY) and produce AUTO-REPAIRED status.
+This fixture must trigger K8 (WARNING) and produce WARNINGS status.

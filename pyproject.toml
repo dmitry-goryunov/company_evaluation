@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "company-evaluation-pipeline"
+version = "0.2.0"
+description = "Policy specification and validation tools for evidence-graded company research"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Dmitry Goryunov" }]
+dependencies = []
+
+[project.scripts]
+company-evaluation-lint = "checks.c9_policy_linter:main"
+
+[tool.setuptools]
+packages = ["checks"]

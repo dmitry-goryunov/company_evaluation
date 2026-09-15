@@ -10,16 +10,17 @@ Edit pipeline_core.md and pipeline_reference.md instead, then re-run this script
 
 Usage:
     python build_dist.py
+    python build_dist.py --check
 """
 
-import os
-import datetime
+import argparse
+from pathlib import Path
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-CORE = os.path.join(REPO_ROOT, "pipeline_core.md")
-REFERENCE = os.path.join(REPO_ROOT, "pipeline_reference.md")
-DIST_DIR = os.path.join(REPO_ROOT, "dist")
-OUTPUT = os.path.join(DIST_DIR, "company_research_level3_single_agent_claude.md")
+REPO_ROOT = Path(__file__).resolve().parent
+CORE = REPO_ROOT / "pipeline_core.md"
+REFERENCE = REPO_ROOT / "pipeline_reference.md"
+DIST_DIR = REPO_ROOT / "dist"
+OUTPUT = DIST_DIR / "company_research_level3_single_agent_claude.md"
 
 HEADER = """> **GENERATED FILE — DO NOT EDIT**
 >
@@ -28,43 +29,43 @@ HEADER = """> **GENERATED FILE — DO NOT EDIT**
 > - `pipeline_reference.md` (canonical — reference, read by section on demand)
 >
 > To update this file, edit the canonical sources and re-run `python build_dist.py`.
-> Generated: {timestamp}
-
 ---
 
 """
 
 
-def build():
-    os.makedirs(DIST_DIR, exist_ok=True)
-
-    with open(CORE, encoding="utf-8") as f:
-        core_text = f.read()
-
-    with open(REFERENCE, encoding="utf-8") as f:
-        reference_text = f.read()
-
-    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    header = HEADER.format(timestamp=timestamp)
-
-    combined = (
-        header
+def build_text():
+    core_text = CORE.read_text(encoding="utf-8")
+    reference_text = REFERENCE.read_text(encoding="utf-8")
+    return (
+        HEADER
         + core_text.rstrip()
         + "\n\n---\n\n"
         + reference_text.lstrip()
     )
 
-    with open(OUTPUT, "w", encoding="utf-8") as f:
-        f.write(combined)
 
-    core_lines = core_text.count("\n")
-    ref_lines = reference_text.count("\n")
-    total_lines = combined.count("\n")
+def build(check=False):
+    combined = build_text()
+    if check:
+        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else None
+        if current != combined:
+            print(f"STALE: {OUTPUT}; run python build_dist.py")
+            return 1
+        print(f"CURRENT: {OUTPUT}")
+        return 0
+
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+    OUTPUT.write_text(combined, encoding="utf-8")
     print(f"Built {OUTPUT}")
-    print(f"  pipeline_core.md:      {core_lines:>5} lines")
-    print(f"  pipeline_reference.md: {ref_lines:>5} lines")
-    print(f"  combined output:       {total_lines:>5} lines")
+    print(f"  pipeline_core.md:      {len(CORE.read_text(encoding='utf-8').splitlines()):>5} lines")
+    print(f"  pipeline_reference.md: {len(REFERENCE.read_text(encoding='utf-8').splitlines()):>5} lines")
+    print(f"  combined output:       {len(combined.splitlines()):>5} lines")
+    return 0
 
 
 if __name__ == "__main__":
-    build()
+    parser = argparse.ArgumentParser(description="Build the deterministic combined pipeline export")
+    parser.add_argument("--check", action="store_true", help="Fail if the committed export is stale")
+    args = parser.parse_args()
+    raise SystemExit(build(check=args.check))

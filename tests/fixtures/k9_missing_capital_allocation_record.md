@@ -1,5 +1,9 @@
 ## c9_status_block
-c9_status: CLEAN
+schema_version: 1
+run_id: fixture-k9
+research_objective: public-equity
+tier: STANDARD
+c9_status: WARNINGS
 gate_mode: AUTO
 human_review_performed: no
 investment_decision_approved: no
@@ -45,4 +49,4 @@ M&A integration synergies and capex discipline in the base case.
 ---
 
 Note: `working/capital_allocation_record.md` is intentionally absent.
-This fixture must trigger K9 (ADVISORY) and produce AUTO-REPAIRED status.
+This fixture must trigger K9 (WARNING) and produce WARNINGS status.
