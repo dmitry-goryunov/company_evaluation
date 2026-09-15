@@ -1,5 +1,9 @@
 ## c9_status_block
-c9_status: CLEAN
+schema_version: 1
+run_id: fixture-k7
+research_objective: public-equity
+tier: STANDARD
+c9_status: WARNINGS
 gate_mode: AUTO
 human_review_performed: no
 investment_decision_approved: no
@@ -44,4 +48,4 @@ The EV/EBITDAX multiple of 2.5x is a 55% discount to the nearest comparable.
 ---
 
 Note: `working/quality_of_earnings_cash_conversion.md` is intentionally absent.
-This fixture must trigger K7 (ADVISORY) and produce AUTO-REPAIRED status.
+This fixture must trigger K7 (WARNING) and produce WARNINGS status.

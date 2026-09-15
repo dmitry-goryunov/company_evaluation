@@ -2,7 +2,24 @@
 
 | date | version | change | reason | triggering_run | approved_by | scope | rollback_note |
 |---|---|---|---|---|---|---|---|
+| 2026-09-15 | 0.2.0 | Enforcement hardening, reproducible build and repository quality baseline | Review found permissive status parsing, unauthenticated one-line overrides, brittle prose regexes, documentation/schema drift, non-executable fixtures, no CI, non-deterministic distribution builds and incomplete repository security/licensing controls. | Full repository review and GitHub execution, 2026-09-15 | User (GitHub execution request, 2026-09-15) | canonical policy, linter, tests, templates, CI, build, README and repository metadata | Revert the 0.2.0 commit; regenerate `dist/` from the restored canonical files. |
 | 2026-06-25 | patch-2026-06-25 | 11-point enforcement patch after Harbour Energy test run | Harbour Energy AUTO run produced a C9 memo with three unresolved C8 must-answer items and investment-action language ("INVEST WITH CONDITIONS", "initiate at 50%"), demonstrating that existing policy rules were not machine-enforced at C9. | Harbour Energy plc (HBR) AUTO run, 2026-06-25, claude-sonnet-4-6 | User (Harbour Energy post-run memo review) | pipeline_core.md, pipeline_reference.md, README.md, checks/c9_policy_linter.py, tests/ | Revert by restoring prior versions of pipeline_core.md and pipeline_reference.md from git; delete checks/c9_policy_linter.py and tests/. |
+
+## Patch detail (0.2.0)
+
+1. Replaced permissive status parsing with a strict, versioned 15-field schema and stable run ID.
+2. Added run-scoped human approval and complete 11-field override validation, including counts and
+   explicit accepted-risk lists.
+3. Corrected investment-language, scenario-midpoint, currency and 12-row liability-bridge checks;
+   made objective and tier affect applicable K-checks.
+4. Added required project-artefact and source-evidence validation plus a saved Markdown report.
+5. Converted fixtures into executable `unittest` coverage, added clean and malformed cases, and
+   replaced the real-company regression fixture with a synthetic company.
+6. Made the combined distribution build deterministic and added stale-export checking.
+7. Added GitHub Actions, Python package metadata, templates, credential exclusions and the MIT text.
+8. Reconciled core/reference schemas, objective/tier composition, linter status semantics,
+   clean-room terminology and source-specific freshness guidance.
+9. Documented the current automated enforcement boundary and the deferred implementation backlog.
 
 ## Patch detail
 

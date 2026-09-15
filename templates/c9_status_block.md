@@ -1,0 +1,16 @@
+## c9_status_block
+schema_version: 1
+run_id: [stable run identifier]
+research_objective: [public-equity | private-investment | credit-lending | m-and-a-target | m-and-a-buyer | strategic-partnership | supplier-vendor | customer-competitor | distressed-restructuring | governance-fraud-risk | general-company-profile]
+tier: [Screen | Standard | Full]
+c9_status: [CLEAN | WARNINGS | BLOCKED]
+gate_mode: [AUTO | MANUAL]
+human_review_performed: [yes | no]
+investment_decision_approved: [yes | no]
+c0_recommendation_cap: [decision-not-ready | watchlist-only | thesis-tracking | speculative-only | human-decision-candidate | unrestricted | reject-avoid]
+unresolved_must_answer_count: [non-negative integer]
+unresolved_high_risk_count: [non-negative integer]
+unresolved_critical_gap_count: [non-negative integer]
+allowed_conclusion_language: [decision-not-ready | watchlist | thesis-tracking | speculative-only | human-decision-candidate | decision-approved | reject-avoid]
+investment_action_allowed: [yes | no]
+position_sizing_allowed: [yes | no]

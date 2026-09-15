@@ -1,0 +1,12 @@
+## decision_log_override
+run_id: [same run_id as c9_status_block]
+reviewer: [human name or accountable role]
+review_date: [YYYY-MM-DD]
+review_scope: [specific stage, finding or risk IDs]
+open_items_reviewed: [explicit list; never "all"]
+override_granted: [yes | no]
+override_reason: [why each item does not block the action]
+accepted_risks: [explicit list]
+position_sizing_approved: [yes | no]
+approved_action: [exact action, or none]
+follow_up_required: [owner, trigger and due date]

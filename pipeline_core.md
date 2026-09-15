@@ -133,11 +133,11 @@ dilution, control or financing risk as load-bearing, in which case the full B2 g
 Applying every control to every company is overkill and will make the process too costly to run.
 Choose a tier up front; record it in `pipeline.md`.
 
-| Tier | When | Stages | Human gates | Evidence packs |
+| Tier | When | Depth treatment | Human gates | Evidence packs |
 |---|---|---|---|---|
-| **Screen** | Quick read, watchlist, first pass | A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite | 2 (A1, C9) | Cap table + valuation inputs only |
-| **Standard** | Active position, real money at stake | A1, B1–B4, B6, C0, C1, C3, C6, C2, C9 | 4 | All load-bearing facts |
-| **Full diligence** | Large position, deal, or contested view | All 16 + governance + clean-room | 5 | All load-bearing facts + appendices |
+| **Screen** | Quick read, watchlist, first pass | Run every objective-mandatory module at lite depth; always include A1, C0-lite, C7-lite and C9-lite, plus B1/B2 where applicable | 2 (A1, C9) | Load-bearing inputs for the selected objective |
+| **Standard** | Active position, real money at stake | Run every objective-mandatory module with full evidence packs and deterministic checks where defined | 4 | All load-bearing facts |
+| **Full diligence** | Large position, deal, or contested view | Standard depth plus applicable overlays, appendices and independent reconstruction | 5 | All load-bearing facts + appendices |
 
 Rules of proportionality:
 - **Primary-source verification of load-bearing facts** is mandatory in every tier and every objective —
@@ -148,8 +148,9 @@ Rules of proportionality:
   **Full diligence**; at Screen they are optional.
 - State the chosen tier and any skipped controls explicitly. Silent scope-cutting is itself an error.
 
-**Screen-tier minimum stages:** A1, B1, B2, B3-lite, C0-lite, C2, C7-lite, C9-lite — where B3-lite = one-page
-business model + traction hierarchy; C0-lite = 3-line claim audit (top-3 claims, valuation level,
+**Screen-tier minimum controls:** A1, C0-lite, C7-lite and C9-lite are universal. Add B1, B2, C2 and
+other modules when the objective selector makes them mandatory or A1 identifies them as load-bearing.
+B3-lite = one-page business model + traction hierarchy; C0-lite = 3-line claim audit (top-3 claims, valuation level,
 recommendation cap); C7-lite = top-10 risks, unscored, with evidence gaps; C9-lite =
 short memo only, no high-conviction conclusion unless escalated. (A Screen must still carry a minimal
 risk and traction snapshot — it may not produce a valuation-led conclusion with neither.)
@@ -556,22 +557,26 @@ or explicitly accepted by human review recorded in final/decision_log.md.
 ### 8A.11 Final memo mandatory status block
 
 Every C9 memo must include **both** of the following blocks near the top (within the first 500 words,
-before the executive conclusion). Screen tier uses a short form covering objective, tier, valuation
-level, recommendation cap and decision-approved only.
+before the executive conclusion). The machine-readable block has the same required fields at every
+tier so automated validation remains unambiguous; the human-readable table may be shortened at Screen.
 
 **Machine-readable YAML block (required first):**
 
 ```yaml
 ## c9_status_block
-c9_status: CLEAN | AUTO-REPAIRED | BLOCKED
+schema_version: 1
+run_id: [stable run identifier shared by memo, report and decision log]
+research_objective: public-equity | private-investment | credit-lending | m-and-a-target | m-and-a-buyer | strategic-partnership | supplier-vendor | customer-competitor | distressed-restructuring | governance-fraud-risk | general-company-profile
+tier: Screen | Standard | Full
+c9_status: CLEAN | WARNINGS | BLOCKED
 gate_mode: AUTO | MANUAL
 human_review_performed: yes | no
 investment_decision_approved: yes | no
-c0_recommendation_cap: [cap label from C0]
+c0_recommendation_cap: decision-not-ready | watchlist-only | thesis-tracking | speculative-only | human-decision-candidate | unrestricted | reject-avoid
 unresolved_must_answer_count: [integer]
 unresolved_high_risk_count: [integer]
 unresolved_critical_gap_count: [integer]
-allowed_conclusion_language: thesis-tracking | decision-not-ready | human-decision-candidate | decision-approved
+allowed_conclusion_language: decision-not-ready | watchlist | thesis-tracking | speculative-only | human-decision-candidate | decision-approved | reject-avoid
 investment_action_allowed: yes | no
 position_sizing_allowed: yes | no
 ```
@@ -590,13 +595,24 @@ If unresolved_must_answer_count > 0:
   position_sizing_allowed = no
   (unless final/decision_log.md records explicit human override with open_items_reviewed listed)
 
+If unresolved_critical_gap_count > 0:
+  allowed_conclusion_language = decision-not-ready
+  investment_action_allowed = no
+  position_sizing_allowed = no
+
+If investment_decision_approved = yes:
+  final/decision_log.md contains a complete decision_approval block for the same run_id
+
 If c9_status = BLOCKED:
   memo must not be presented as a final investment memo
   memo must state it cannot be used as a decision basis
 ```
 
-The C9 linter must refuse to emit status CLEAN if any field in either block is blank or if any
-derivation rule above is violated. An unfilled field is treated as a hard blocker.
+The C9 linter must refuse status CLEAN if any field is blank, invalid, duplicated, inconsistent with
+the current run, or violates a derivation above. An unfilled field is a hard blocker. The linter is
+read-only: it emits CLEAN, WARNINGS or BLOCKED and writes a report. `AUTO-REPAIRED` remains a stage
+execution label only and may be used only after an agent has made an explicit edit recorded in
+`working/c9_repair_log.md`.
 
 **Human-readable markdown table (required second):**
 
@@ -615,7 +631,7 @@ derivation rule above is violated. An unfilled field is treated as a hard blocke
 | Gross vs attributable basis checked? | yes / no / not applicable |
 | Legal entity and shareholder-rights basis checked? | yes / no |
 | Source supersession check completed? | yes / no |
-| Final recommendation cap | unrestricted / speculative only / watchlist only / decision-not-ready |
+| Final recommendation cap | unrestricted / human-decision-candidate / speculative-only / thesis-tracking / watchlist-only / decision-not-ready / reject-avoid |
 | Investment decision approved? | no unless explicit human approval is recorded |
 ```
 
@@ -839,25 +855,28 @@ no credentials in the repo; **a test run completed on at least one numeric check
 
 ### C9 artefact-presence check list
 
-Before C9 can emit any output, verify the following artefacts exist and are non-empty. A missing or
-empty artefact causes C9 status = BLOCKED. The linter must check each item explicitly; it may not
+Before a C9 draft can be promoted to `final/memo.md`, verify the following artefacts exist and are
+non-empty. Draft to `working/memo_draft.md`, run the linter, save its current-run report, make any
+explicit repairs, rerun affected checks, and only then promote the reviewed draft. A missing or empty
+required artefact causes C9 status = BLOCKED. The linter checks each listed item explicitly; it may not
 infer presence from conversation context.
 
 ```text
 Required (hard blockers if absent):
   working/facts_ledger.md           — append-only ledger with at least one entry
-  working/evidence_gaps.md          — gap register (may be empty if none found, but file must exist)
+  working/evidence_gaps.md          — gap register (may contain only "none" if no gaps were found)
   working/open_questions.md         — open questions (may contain only "none" if resolved)
   final/decision_log.md             — at least one entry
-  working/c9_linter_report.md       — linter output from current run (not a prior run)
   working/c9_repair_log.md          — repair log from current run (may state "no repairs needed")
-  working/[claim_audit].md          — C0 claim audit output (filename per company convention)
+  working/claim_audit.md            — C0 claim audit output
   working/disconfirming_evidence.md — §10B table
+  working/falsification_triggers.md — at least one thesis-level falsifier entry
 
-Conditionally required (hard blockers when condition applies):
+Conditionally required for the stated conclusion or tier (status follows the cited K-check: K1 is
+BLOCKED; K2, K4 scenario-link and K5–K10 produce WARNINGS and cap the conclusion unless another hard
+rule applies):
   working/market_implied_expectations.md          — required if memo body contains mispricing language; optional otherwise
   working/opposing_thesis.md                       — required for Standard and Full tier; may state "not documented" for Screen
-  working/falsification_triggers.md                — required; at minimum one thesis-level falsifier entry
   working/reference_class_base_rate.md             — required for Standard and Full tier valuation-mandate runs
   working/quality_of_earnings_cash_conversion.md  — required for Standard and Full tier; must include sustainable_cash_flow
   working/incentive_control_map.md                 — required when triggering conditions exist (§8A.18)
@@ -874,6 +893,10 @@ Rule: if the final memo claims "all load-bearing claims are sourced" but neither
 nor notebooklm_outputs/raw/ is inspectable, the claim is false and C9 status = BLOCKED.
 
 Rule: a stage has not passed if its output cannot be independently inspected from saved files.
+
+After the pre-lint artefact checks, `checks/c9_policy_linter.py` writes
+`working/c9_linter_report.md`. The `run_id` in the memo, report context and any approval or override
+must refer to the same run; a report copied from an earlier run is invalid.
 ```
 
 ## 22. Directory structure

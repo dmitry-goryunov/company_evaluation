@@ -1,5 +1,9 @@
 ## c9_status_block
-c9_status: CLEAN
+schema_version: 1
+run_id: fixture-k10
+research_objective: public-equity
+tier: STANDARD
+c9_status: WARNINGS
 gate_mode: AUTO
 human_review_performed: no
 investment_decision_approved: no
@@ -37,4 +41,4 @@ and cost efficiency. The research is directional only. No investment action is d
 
 Note: working/monitoring_plan.md is intentionally omitted. No re-underwriting schedule is included.
 The memo has "Evidence that would change the conclusion" (so K3 does not fire).
-This fixture must trigger DEPTH_CONTROL_K10 (ADVISORY) and produce AUTO-REPAIRED status.
+This fixture must trigger DEPTH_CONTROL_K10 (WARNING) and produce WARNINGS status.
